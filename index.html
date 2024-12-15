@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="style.css" rel="stylesheet"/>
-    <title>Пирамида сложения</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
-</head>
-<body>
-    <script src="game.js"></script> 
-</body>
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="style.css" rel="stylesheet" />
+    <title>Выбор игры</title>
+  </head>
+  <body>
+    <div class="games">
+      <div class="game-card" onclick="location.href='piramid.html'">
+        <p>Пирамида сложения</p>
+      </div>
+      <div class="game-card" onclick="location.href='columns.html'">
+        <p>Столбец</p>
+      </div>
+    </div>
+  </body>
 </html>

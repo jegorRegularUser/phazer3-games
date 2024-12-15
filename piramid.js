@@ -1,22 +1,4 @@
-const STYLES = {
-  textWhite: "#ffffff",
-  textGreen: "#00ff00",
-  inputTextColor: "#ffffff",
-  inputTextCorrect: "#004400",
-  inputTextIncorrect: "#440000",
-
-  backgroundGray: "#555555",
-  backgroundDarkGray: "#444444",
-  backgroundMain: "#333333",
-  backgroundDark: "#222222",
-  backgroundGreen: "#00aa00",
-  inputBackgroundCorrect: "#90EE90",
-  inputBackgroundIncorrect: "#FFB6C1",
-
-  fontSizeLarge: "28px",
-  fontSizeMedium: "24px",
-  fontSizeSmall: "18px",
-};
+//Все переменные снизу
 
 class MenuScene extends Phaser.Scene {
   constructor() {
@@ -49,7 +31,7 @@ class MenuScene extends Phaser.Scene {
         .text(index == 0 ? 0 : index * 100 + 30, 0, mode, {
           fontSize: STYLES.fontSizeMedium,
           color: STYLES.textWhite,
-          backgroundColor: STYLES.backgroundGray,
+          backgroundColor: STYLES.backgroundSec,
           padding: { x: 10, y: 5 },
         })
         .setInteractive()
@@ -65,7 +47,7 @@ class MenuScene extends Phaser.Scene {
         if (button.text === newMode) {
           button.setBackgroundColor(STYLES.backgroundGreen);
         } else {
-          button.setBackgroundColor(STYLES.backgroundGray);
+          button.setBackgroundColor(STYLES.backgroundSec);
         }
       });
     };
@@ -82,7 +64,7 @@ class MenuScene extends Phaser.Scene {
         .text(200 + index * 50, spacing, `${count}`, {
           fontSize: STYLES.fontSizeMedium,
           color: STYLES.textWhite,
-          backgroundColor: STYLES.backgroundGray,
+          backgroundColor: STYLES.backgroundSec,
           padding: { x: 10, y: 5 },
         })
         .setInteractive();
@@ -93,7 +75,7 @@ class MenuScene extends Phaser.Scene {
       button.on("pointerdown", () => {
         this.digitCount = index + 1;
         digitButtons.forEach((btn) =>
-          btn.setBackgroundColor(STYLES.backgroundGray)
+          btn.setBackgroundColor(STYLES.backgroundSec)
         );
         button.setBackgroundColor(STYLES.backgroundGreen);
       });
@@ -112,7 +94,7 @@ class MenuScene extends Phaser.Scene {
         .text(150 + index * 50, spacing * 2, `${level}`, {
           fontSize: STYLES.fontSizeMedium,
           color: STYLES.textWhite,
-          backgroundColor: STYLES.backgroundGray,
+          backgroundColor: STYLES.backgroundSec,
           padding: { x: 10, y: 5 },
         })
         .setInteractive();
@@ -122,22 +104,13 @@ class MenuScene extends Phaser.Scene {
       button.on("pointerdown", () => {
         this.level = index + 2;
         levelButtons.forEach((btn) =>
-          btn.setBackgroundColor(STYLES.backgroundGray)
+          btn.setBackgroundColor(STYLES.backgroundSec)
         );
         button.setBackgroundColor(STYLES.backgroundGreen);
       });
     });
     levelButtons[this.level - 1].setBackgroundColor(STYLES.backgroundGreen);
     this.level = 3;
-
-    settingsContainer.add([
-      modeLabel,
-      modeContainer,
-      digitCountLabel,
-      ...digitButtons,
-      levelLabel,
-      ...levelButtons,
-    ]);
 
     const startButton = this.add
       .text(225, spacing * 3, "Запустить игру", {
@@ -147,8 +120,8 @@ class MenuScene extends Phaser.Scene {
         padding: { x: 20, y: 10 },
       })
       .setOrigin(0.5)
-      .setInteractive();
-    startButton.on("pointerdown", () => {
+      .setInteractive()
+      .on("pointerdown", () => {
       this.scene.start("GameScene", {
         mode: this.mode,
         digitCount: this.digitCount,
@@ -156,7 +129,30 @@ class MenuScene extends Phaser.Scene {
         score: 0,
       });
     });
-    settingsContainer.add(startButton);
+
+    const backButton = this.add
+      .text(225, spacing * 3.7, "Назад", {
+        fontSize: STYLES.fontSizeLarge,
+        color: STYLES.textWhite,
+        backgroundColor: STYLES.backgroundSec,
+        padding: { x: 20, y: 10 },
+      })
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerdown", () => {
+      window.location.href = "index.html";
+    });
+
+    settingsContainer.add([
+      modeLabel,
+      modeContainer,
+      digitCountLabel,
+      ...digitButtons,
+      levelLabel,
+      ...levelButtons,
+      startButton,
+      backButton,
+    ]);
   }
 }
 class GameScene extends Phaser.Scene {
@@ -186,7 +182,7 @@ class GameScene extends Phaser.Scene {
     const pyramidY = this.scale.height * 0.2;
     const centerX = this.scale.width / 2;
     const horizontalGap = this.scale.width > 700 ? this.scale.width * 0.05 : 85;
-    const verticalGap = this.scale.height * 0.08;
+    const verticalGap = this.scale.height * 0.06;
 
     const pyramidContainer = this.add.container(centerX + 45, pyramidY);
 
@@ -195,26 +191,51 @@ class GameScene extends Phaser.Scene {
       const startX = -(row.length * horizontalGap) / 2;
       row.forEach((value, valueIndex) => {
         if (rowIndex === rows.length - 1) {
-          rowContainer.add(
-            this.add
-              .text(startX + valueIndex * horizontalGap, 0, value, {
-                fontSize: STYLES.fontSizeSmall,
-                color: STYLES.textWhite,
-                backgroundColor: STYLES.backgroundDarkGray,
-                padding: { x: 15, y: 8 },
-                borderRadius: 10,
-              })
-              .setOrigin(0.5)
+          const textBackground = this.add.graphics();
+          const textX = startX + valueIndex * horizontalGap;
+
+          const textStyle = {
+            fontSize: STYLES.fontSizeSmall,
+            color: STYLES.textWhite,
+            align: "center",
+          };
+          const textWidth = 70;
+          const textHeight = 35;
+          const borderRadius = 10;
+          textBackground.fillStyle(
+            Phaser.Display.Color.HexStringToColor(STYLES.backgroundMainDark).color
           );
+          textBackground.fillRoundedRect(
+            textX - textWidth / 2,
+            -textHeight / 2,
+            textWidth,
+            textHeight,
+            borderRadius
+          );
+          textBackground.lineStyle(
+            2,
+            Phaser.Display.Color.HexStringToColor("#ccc").color
+          );
+          textBackground.strokeRoundedRect(
+            textX - textWidth / 2,
+            -textHeight / 2,
+            textWidth,
+            textHeight,
+            borderRadius
+          );
+          const text = this.add.text(textX, 0, value, textStyle).setOrigin(0.5);
+
+          rowContainer.add([textBackground, text]);
         } else {
           const input = this.add.dom(
             startX + valueIndex * horizontalGap,
             0,
             "input",
             `width: 60px; text-align: center; border: 2px solid #ccc; border-radius: 10px; 
-                            padding: 5px; background-color: ${STYLES.backgroundDark}; color: ${STYLES.inputTextColor}; 
-                            font-size: ${STYLES.fontSizeSmall}; outline: none`
+                    padding: 5px; background-color: ${STYLES.backgroundMainDark}; color: ${STYLES.textWhite}; 
+                    font-size: ${STYLES.fontSizeSmall}; outline: none`
           );
+
           this.inputs.push({ input, correctValue: value });
           rowContainer.add(input);
         }
@@ -223,7 +244,7 @@ class GameScene extends Phaser.Scene {
     });
 
     this.scoreText = this.add
-      .text(centerX, pyramidY - 40, `Счет: ${score}`, {
+      .text(centerX, 50, `Счет: ${score}`, {
         fontSize: STYLES.fontSizeMedium,
         color: STYLES.textWhite,
       })
@@ -259,7 +280,7 @@ class GameScene extends Phaser.Scene {
             {
               fontSize: STYLES.fontSizeMedium,
               color: STYLES.textWhite,
-              backgroundColor: STYLES.backgroundGray,
+              backgroundColor: STYLES.backgroundSec,
               padding: { x: 10, y: 5 },
               borderRadius: 10,
             }
@@ -272,7 +293,7 @@ class GameScene extends Phaser.Scene {
           .text(centerX + 100, this.scale.height * 0.9, "Продолжить", {
             fontSize: STYLES.fontSizeMedium,
             color: STYLES.textWhite,
-            backgroundColor: STYLES.backgroundGray,
+            backgroundColor: STYLES.backgroundSec,
             padding: { x: 10, y: 5 },
             borderRadius: 10,
           })
@@ -297,6 +318,25 @@ class GameScene extends Phaser.Scene {
       });
   }
 }
+
+const STYLES = {
+  textWhite: "#ffffff",
+  textGreen: "#00ff00",
+  inputTextCorrect: "#004400",
+  inputTextIncorrect: "#440000",
+
+  backgroundSecDark: "#444444",
+  backgroundSec: "#555555",
+  backgroundMain: "#333333",
+  backgroundMainDark: "#222222",
+  backgroundGreen: "#00aa00",
+  inputBackgroundCorrect: "#90EE90",
+  inputBackgroundIncorrect: "#FFB6C1",
+
+  fontSizeLarge: "28px",
+  fontSizeMedium: "24px",
+  fontSizeSmall: "18px",
+};
 
 const config = {
   type: Phaser.AUTO,

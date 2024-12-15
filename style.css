@@ -1,7 +1,44 @@
 body {
   margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
   background-color: #333333;
 }
+
+.games {
+  display: flex;
+  gap: 20px;
+}
+
+.game-card {
+  width: 150px;
+  height: 150px;
+  background-color: #00aa00;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.game-card:hover {
+  background-color: #028f02;
+  transform: scale(1.1);
+}
+
+p {
+  margin: 0;
+  text-align: center;
+}
+
 #game-container {
   position: absolute;
   top: 0;
