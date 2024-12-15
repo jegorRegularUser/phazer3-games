@@ -7,7 +7,7 @@ const STYLES = {
 
   backgroundGray: "#555555",
   backgroundDarkGray: "#444444",
-  backgroundAll: "#333333",
+  backgroundMain: "#333333",
   backgroundDark: "#222222",
   backgroundGreen: "#00aa00",
   inputBackgroundCorrect: "#90EE90",
@@ -302,7 +302,7 @@ const config = {
   type: Phaser.AUTO,
   width: window.innerWidth,
   height: window.innerHeight,
-  backgroundColor: STYLES.backgroundAll,
+  backgroundColor: STYLES.backgroundMain,
   parent: "game-container",
   dom: {
     createContainer: true,
