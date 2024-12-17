@@ -102,7 +102,7 @@ class MenuScene extends Phaser.Scene {
     this.level = 1;
     levelButtons.forEach((button, index) => {
       button.on("pointerdown", () => {
-        this.level = index + 2;
+        this.level = index + 3;
         levelButtons.forEach((btn) =>
           btn.setBackgroundColor(STYLES.backgroundSec)
         );
@@ -113,7 +113,7 @@ class MenuScene extends Phaser.Scene {
     this.level = 3;
 
     const startButton = this.add
-      .text(225, spacing * 3, "Запустить игру", {
+      .text(291, spacing * 3.3, "Старт", {
         fontSize: STYLES.fontSizeLarge,
         color: STYLES.textWhite,
         backgroundColor: STYLES.backgroundGreen,
@@ -122,16 +122,16 @@ class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerdown", () => {
-      this.scene.start("GameScene", {
-        mode: this.mode,
-        digitCount: this.digitCount,
-        level: this.level,
-        score: 0,
+        this.scene.start("GameScene", {
+          mode: this.mode,
+          digitCount: this.digitCount,
+          level: this.level,
+          score: 0,
+        });
       });
-    });
 
     const backButton = this.add
-      .text(225, spacing * 3.7, "Назад", {
+      .text(157, spacing * 3.3, "Назад", {
         fontSize: STYLES.fontSizeLarge,
         color: STYLES.textWhite,
         backgroundColor: STYLES.backgroundSec,
@@ -140,8 +140,8 @@ class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerdown", () => {
-      window.location.href = "index.html";
-    });
+        window.location.href = "index.html";
+      });
 
     settingsContainer.add([
       modeLabel,
@@ -191,41 +191,19 @@ class GameScene extends Phaser.Scene {
       const startX = -(row.length * horizontalGap) / 2;
       row.forEach((value, valueIndex) => {
         if (rowIndex === rows.length - 1) {
-          const textBackground = this.add.graphics();
-          const textX = startX + valueIndex * horizontalGap;
+          console.log(value);
+          const input = this.add.dom(
+            startX + valueIndex * horizontalGap,
+            0,
+            "input",
+            `width: 60px; text-align: center; border: 2px solid #ccc; border-radius: 10px; 
+             padding: 5px; background-color: ${STYLES.backgroundMainDark}; color: ${STYLES.textWhite};
+             font-size: ${STYLES.fontSizeSmall}; outline: none`
+          );
+          input.node.value = value;
+          input.node.setAttribute("readonly", "readonly");
 
-          const textStyle = {
-            fontSize: STYLES.fontSizeSmall,
-            color: STYLES.textWhite,
-            align: "center",
-          };
-          const textWidth = 70;
-          const textHeight = 35;
-          const borderRadius = 10;
-          textBackground.fillStyle(
-            Phaser.Display.Color.HexStringToColor(STYLES.backgroundMainDark).color
-          );
-          textBackground.fillRoundedRect(
-            textX - textWidth / 2,
-            -textHeight / 2,
-            textWidth,
-            textHeight,
-            borderRadius
-          );
-          textBackground.lineStyle(
-            2,
-            Phaser.Display.Color.HexStringToColor("#ccc").color
-          );
-          textBackground.strokeRoundedRect(
-            textX - textWidth / 2,
-            -textHeight / 2,
-            textWidth,
-            textHeight,
-            borderRadius
-          );
-          const text = this.add.text(textX, 0, value, textStyle).setOrigin(0.5);
-
-          rowContainer.add([textBackground, text]);
+          rowContainer.add(input);
         } else {
           const input = this.add.dom(
             startX + valueIndex * horizontalGap,
@@ -251,7 +229,7 @@ class GameScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(centerX, this.scale.height * 0.8, "Завершить игру", {
+      .text(centerX, this.scale.height * 0.8, "Проверить", {
         fontSize: STYLES.fontSizeLarge,
         color: STYLES.textWhite,
         backgroundColor: STYLES.backgroundGreen,
@@ -272,49 +250,52 @@ class GameScene extends Phaser.Scene {
           }
         });
 
-        this.add
-          .text(
-            centerX - 150,
-            this.scale.height * 0.9,
-            "Вернуться в настройки",
-            {
-              fontSize: STYLES.fontSizeMedium,
-              color: STYLES.textWhite,
-              backgroundColor: STYLES.backgroundSec,
-              padding: { x: 10, y: 5 },
-              borderRadius: 10,
-            }
-          )
-          .setOrigin(0.5)
-          .setInteractive()
-          .on("pointerdown", () => this.scene.start("MenuScene"));
-
-        this.add
-          .text(centerX + 100, this.scale.height * 0.9, "Продолжить", {
-            fontSize: STYLES.fontSizeMedium,
-            color: STYLES.textWhite,
+        this.continueButton
+          .setAlpha(1)
+          .setStyle({
             backgroundColor: STYLES.backgroundSec,
-            padding: { x: 10, y: 5 },
-            borderRadius: 10,
           })
-          .setOrigin(0.5)
-          .setInteractive()
-          .on("pointerdown", () => {
-            if (this.inputs.every(({ input }) => input.correctCheck)) {
-              score++;
-            }
-            if (mode === "Обычный") {
-              this.scene.restart({ mode, digitCount, level, score });
-            } else {
-              this.scene.restart({
-                mode,
-                digitCount: Math.min(digitCount + 1, 4),
-                level: Math.min(level + 1, 5),
-                score,
-              });
-            }
-            this.scoreText.setText(`Счет: ${this.score}`);
+          .setInteractive();
+      });
+
+    this.backButton = this.add
+      .text(centerX - 87, this.scale.height * 0.9, "Настройки", {
+        fontSize: STYLES.fontSizeMedium,
+        color: STYLES.textWhite,
+        backgroundColor: STYLES.backgroundSec,
+        padding: { x: 10, y: 5 },
+        borderRadius: 10,
+      })
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerdown", () => this.scene.start("MenuScene"));
+
+    this.continueButton = this.add
+      .text(centerX + 93, this.scale.height * 0.9, "Продолжить", {
+        fontSize: STYLES.fontSizeMedium,
+        color: STYLES.textWhite,
+        backgroundColor: STYLES.backgroundSecDark,
+        padding: { x: 10, y: 5 },
+        borderRadius: 10,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0.5)
+      .disableInteractive()
+      .on("pointerdown", () => {
+        if (this.inputs.every(({ input }) => input.correctCheck)) {
+          score++;
+        }
+        if (mode === "Обычный") {
+          this.scene.restart({ mode, digitCount, level, score });
+        } else {
+          this.scene.restart({
+            mode,
+            digitCount: Math.min(digitCount + 1, 4),
+            level: Math.min(level + 1, 5),
+            score,
           });
+        }
+        this.scoreText.setText(`Счет: ${this.score}`);
       });
   }
 }

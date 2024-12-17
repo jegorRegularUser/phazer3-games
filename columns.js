@@ -18,14 +18,14 @@ class MenuScene extends Phaser.Scene {
     const spacing = 80;
 
     // Кол-во столбцов
-    const columnCountLabel = this.add.text(0, 0, "Кол-во столбцов:", {
+    const columnCountLabel = this.add.text(0, 0, "Столбцы:", {
       fontSize: STYLES.fontSizeMedium,
       color: STYLES.textWhite,
     });
 
     const columnButtons = [1, 2, 3, 4, 5].map((count, index) => {
       return this.add
-        .text(240 + index * 50, 0, `${count}`, {
+        .text(150 + index * 50, 0, `${count}`, {
           fontSize: STYLES.fontSizeMedium,
           color: STYLES.textWhite,
           backgroundColor: STYLES.backgroundSec,
@@ -134,7 +134,7 @@ class MenuScene extends Phaser.Scene {
     addendButtons[0].setBackgroundColor(STYLES.backgroundGreen);
 
     const startButton = this.add
-      .text(225, spacing * 4.2, "Запустить игру", {
+      .text(291, spacing * 4.2, "Старт", {
         fontSize: STYLES.fontSizeLarge,
         color: STYLES.textWhite,
         backgroundColor: STYLES.backgroundGreen,
@@ -148,12 +148,18 @@ class MenuScene extends Phaser.Scene {
           operation: this.operation,
           difficulty: this.difficulty,
           addends: this.addends,
-          score: [{ wins: 0, total: 0 },{ wins: 0, total: 0 },{ wins: 0, total: 0 },{ wins: 0, total: 0 },{ wins: 0, total: 0 }],
+          score: [
+            { wins: 0, total: 0 },
+            { wins: 0, total: 0 },
+            { wins: 0, total: 0 },
+            { wins: 0, total: 0 },
+            { wins: 0, total: 0 },
+          ],
         });
       });
 
     const backButton = this.add
-      .text(225, spacing * 5.1, "Назад", {
+      .text(157, spacing * 4.2, "Назад", {
         fontSize: STYLES.fontSizeLarge,
         color: STYLES.textWhite,
         backgroundColor: STYLES.backgroundSec,
@@ -181,181 +187,205 @@ class MenuScene extends Phaser.Scene {
 }
 
 class GameScene extends Phaser.Scene {
-    constructor() {
-        super({ key: "GameScene" });
-    }
+  constructor() {
+    super({ key: "GameScene" });
+  }
 
-    create({ columnCount, operation, difficulty, addends, score }) {
-        const centerX = this.scale.width / 2;
-        const centerY = this.scale.height / 2;
+  create({ columnCount, operation, difficulty, addends, score }) {
+    const centerX = this.scale.width / 2;
+    const centerY = this.scale.height / 2;
 
-        this.columnCount = columnCount;
-        this.operation = operation;
-        this.difficulty = difficulty;
-        this.addends = addends;
-        this.score = score;
+    this.columnCount = columnCount;
+    this.operation = operation;
+    this.difficulty = difficulty;
+    this.addends = addends;
+    this.score = score;
 
-        this.columns = [];
-        this.correctAnswers = [];
-        this.inputs = [];
-        this.checkButtons = [];
-        this.resultTexts = [];
-        this.columnScores = []; // Массив для хранения счетов каждого столбца
+    this.columns = [];
+    this.correctAnswers = [];
+    this.inputs = [];
+    this.checkButtons = [];
+    this.resultTexts = [];
+    this.columnScores = [];
 
-        const difficultes = [9, 99, 999, 9999, 99999, 999999];
-        const numberRange =
-            Math.pow(10, difficultes[difficulty - 1].toString().length) - 1;
+    const difficultes = [9, 99, 999, 9999, 99999, 999999];
+    const numberRange =
+      Math.pow(10, difficultes[difficulty - 1].toString().length) - 1;
 
-        // Включаем счета вверху
-        for (let i = 0; i < columnCount; i++) {
-            const column = this.createColumn(i, numberRange);
-            this.columns.push(column);
+    for (let i = 0; i < columnCount; i++) {
+      const column = this.createColumn(i, numberRange);
+      this.columns.push(column);
 
-            const columnScore = this.add
-                .text(centerX + i * 250 - (this.columnCount - 1) * 125, 50, `${this.score[i].wins} из ${this.score[i].total}`, {
-                    fontSize: "32px",
-                    color: STYLES.textWhite,
-                })
-                .setOrigin(0.5);
-            this.columnScores.push(columnScore);
-
-            const input = this.add.dom(
-                centerX + i * 250 - (this.columnCount - 1) * 125,
-                centerY + 100,
-                "input",
-                {
-                    width: "200px",
-                    height: "40px",
-                    textAlign: "center",
-                    fontSize: STYLES.fontSizeMedium,
-                    borderRadius: "5px",
-                }
-            );
-            this.inputs.push(input);
-
-            const checkButton = this.add
-                .text(centerX + i * 250 - (this.columnCount - 1) * 125, centerY + 170, "Ответить", {
-                    fontSize: STYLES.fontSizeLarge,
-                    color: STYLES.textWhite,
-                    backgroundColor: STYLES.backgroundGreen,
-                    padding: { x: 20, y: 10 },
-                })
-                .setOrigin(0.5)
-                .setInteractive()
-                .on("pointerdown", () => this.checkAnswer(i));
-            this.checkButtons.push(checkButton);
-
-            const resultText = this.add
-                .text(centerX + i * 250 - (this.columnCount - 1) * 125, centerY, "", {
-                    fontSize: STYLES.fontSizeMedium,
-                    color: STYLES.textWhite,
-                    padding: { x: 10, y: 5 },
-                })
-                .setOrigin(0.5);
-            this.resultTexts.push(resultText);
-        }
-
-        this.backButton = this.add
-            .text(centerX - 100, centerY + 290, "Назад", {
-                fontSize: STYLES.fontSizeLarge,
-                color: STYLES.textWhite,
-                backgroundColor: STYLES.backgroundSec,
-                padding: { x: 20, y: 10 },
-            })
-            .setOrigin(0.5)
-            .setInteractive()
-            .on("pointerdown", () => this.scene.start("MenuScene"));
-
-        this.continueButton = this.add
-            .text(centerX + 100, centerY + 290, "Продолжить", {
-                fontSize: STYLES.fontSizeLarge,
-                color: STYLES.textWhite,
-                backgroundColor: STYLES.backgroundSec,
-                padding: { x: 20, y: 10 },
-            })
-            .setOrigin(0.5)
-            .setInteractive()
-            .on("pointerdown", () => this.continueGame());
-
-        this.continueButton.setVisible(false);
-    }
-
-    createColumn(index, numberRange) {
-        const centerX = this.scale.width / 2;
-        const centerY = this.scale.height / 2;
-        const column = [];
-        let sum = 0;
-
-        for (let i = 0; i < this.addends; i++) {
-            const number = this.getRandomNumber(numberRange);
-            column.push(number);
-            sum += number;
-        }
-
-        const columnText = this.add.text(
-            centerX + index * 250 - (this.columnCount - 1) * 125,
-            centerY - 100,
-            column.join("\n"),
-            {
-                fontSize: "38px",
-                color: STYLES.textWhite,
-                align: "center",
-            }
+      const columnScore = this.add
+        .text(
+          centerX + i * 250 - (this.columnCount - 1) * 125,
+          50,
+          `${this.score[i].wins} из ${this.score[i].total}`,
+          {
+            fontSize: "32px",
+            color: STYLES.textWhite,
+          }
         )
         .setOrigin(0.5);
+      this.columnScores.push(columnScore);
 
-        this.correctAnswers.push(sum);
-        return columnText;
-    }
-
-    getRandomNumber(numberRange) {
-        let number = Phaser.Math.Between(1, numberRange);
-        return this.operation === "-"
-            ? -number
-            : this.operation === "+/-"
-            ? Phaser.Math.Between(0, 1)
-                ? number
-                : -number
-            : number;
-    }
-
-    checkAnswer(columnIndex) {
-        const userAnswer = parseInt(this.inputs[columnIndex].node.value);
-        const correctAnswer = this.correctAnswers[columnIndex];
-
-        const isCorrect = userAnswer === correctAnswer;
-
-        const resultText = isCorrect
-            ? `${userAnswer} = ${correctAnswer}!`
-            : `${isNaN(userAnswer) ? 0 : userAnswer} ≠ ${correctAnswer}!`;
-
-        this.columns[columnIndex].setVisible(false);
-        this.inputs[columnIndex].setVisible(false);
-        this.checkButtons[columnIndex].setVisible(false);
-
-        this.resultTexts[columnIndex].setText(resultText)
-            .setBackgroundColor(isCorrect ? STYLES.backgroundGreen : STYLES.backgroundSec);
-
-        if (isCorrect) {
-            this.score[columnIndex].wins++;
+      const input = this.add.dom(
+        centerX + i * 250 - (this.columnCount - 1) * 125,
+        centerY + 100,
+        "input",
+        {
+          width: "200px",
+          height: "40px",
+          textAlign: "center",
+          fontSize: STYLES.fontSizeMedium,
+          borderRadius: "5px",
         }
-        this.score[columnIndex].total++;
-        this.columnScores[columnIndex].setText(`${this.score[columnIndex].wins} из ${this.score[columnIndex].total}`);
+      );
+      this.inputs.push(input);
 
-        if (this.checkButtons.every(button => !button.visible)) {
-            this.continueButton.setVisible(true);
-            this.backButton.setVisible(true);
+      const checkButton = this.add
+        .text(
+          centerX + i * 250 - (this.columnCount - 1) * 125,
+          centerY + 170,
+          "Ответить",
+          {
+            fontSize: STYLES.fontSizeLarge,
+            color: STYLES.textWhite,
+            backgroundColor: STYLES.backgroundGreen,
+            padding: { x: 20, y: 10 },
+          }
+        )
+        .setOrigin(0.5)
+        .setInteractive()
+        .on("pointerdown", () => this.checkAnswer(i));
+      this.checkButtons.push(checkButton);
+
+      const resultText = this.add
+        .text(centerX + i * 250 - (this.columnCount - 1) * 125, centerY, "", {
+          fontSize: STYLES.fontSizeMedium,
+          color: STYLES.textWhite,
+          padding: { x: 10, y: 5 },
+        })
+        .setOrigin(0.5);
+      this.resultTexts.push(resultText);
+    }
+
+    this.backButton = this.add
+      .text(centerX - 100, centerY + 290, "Назад", {
+        fontSize: STYLES.fontSizeLarge,
+        color: STYLES.textWhite,
+        backgroundColor: STYLES.backgroundSec,
+        padding: { x: 20, y: 10 },
+      })
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerdown", () => this.scene.start("MenuScene"));
+
+    this.continueButton = this.add
+      .text(centerX + 100, centerY + 290, "Продолжить", {
+        fontSize: STYLES.fontSizeLarge,
+        color: STYLES.textWhite,
+        backgroundColor: STYLES.backgroundSec,
+        padding: { x: 20, y: 10 },
+      })
+      .setOrigin(0.5)
+      .disableInteractive()
+      .setAlpha(0.5)
+      .setStyle({
+        backgroundColor: STYLES.backgroundSecDark,
+      })
+      .on("pointerdown", () => this.continueGame());
+  }
+
+  createColumn(index, numberRange) {
+    const centerX = this.scale.width / 2;
+    const centerY = this.scale.height / 2;
+    const column = [];
+    let sum = 0;
+
+    for (let i = 0; i < this.addends; i++) {
+      const number = this.getRandomNumber(numberRange);
+      column.push(number);
+      sum += number;
+    }
+
+    const columnText = this.add
+      .text(
+        centerX + index * 250 - (this.columnCount - 1) * 125,
+        centerY - 150,
+        column.join("\n"),
+        {
+          fontSize: "38px",
+          color: STYLES.textWhite,
+          align: "center",
         }
-    }
+      )
+      .setOrigin(0.5);
 
-    continueGame() {
-        this.scene.restart({ columnCount: this.columnCount, operation: this.operation, difficulty: this.difficulty, addends: this.addends, score: this.score });
+    this.correctAnswers.push(sum);
+    return columnText;
+  }
+
+  getRandomNumber(numberRange) {
+    let number = Phaser.Math.Between(1, numberRange);
+    return this.operation === "-"
+      ? -number
+      : this.operation === "+/-"
+      ? Phaser.Math.Between(0, 1)
+        ? number
+        : -number
+      : number;
+  }
+
+  checkAnswer(columnIndex) {
+    const userAnswer = parseInt(this.inputs[columnIndex].node.value);
+    const correctAnswer = this.correctAnswers[columnIndex];
+
+    const isCorrect = userAnswer === correctAnswer;
+
+    const resultText = isCorrect
+      ? `${userAnswer} = ${correctAnswer}!`
+      : `${isNaN(userAnswer) ? 0 : userAnswer} ≠ ${correctAnswer}!`;
+
+    this.columns[columnIndex].setVisible(false);
+    this.inputs[columnIndex].setVisible(false);
+    this.checkButtons[columnIndex].setVisible(false);
+
+    this.resultTexts[columnIndex]
+      .setText(resultText)
+      .setBackgroundColor(
+        isCorrect ? STYLES.backgroundGreen : STYLES.backgroundSec
+      );
+
+    if (isCorrect) {
+      this.score[columnIndex].wins++;
     }
+    this.score[columnIndex].total++;
+    this.columnScores[columnIndex].setText(
+      `${this.score[columnIndex].wins} из ${this.score[columnIndex].total}`
+    );
+
+    if (this.checkButtons.every((button) => !button.visible)) {
+      this.backButton.setVisible(true);
+      this.continueButton
+        .setAlpha(1)
+        .setStyle({
+          backgroundColor: STYLES.backgroundSec,
+        })
+        .setInteractive();
+    }
+  }
+
+  continueGame() {
+    this.scene.restart({
+      columnCount: this.columnCount,
+      operation: this.operation,
+      difficulty: this.difficulty,
+      addends: this.addends,
+      score: this.score,
+    });
+  }
 }
-
-
-
-
 
 const STYLES = {
   textWhite: "#ffffff",
