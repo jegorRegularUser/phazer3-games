@@ -191,7 +191,7 @@ class GameScene extends Phaser.Scene {
     super({ key: "GameScene" });
   }
 
-  create({ columnCount, operation, difficulty, addends, score }) {
+  create({ columnCount, operation, difficulty, addends, score, playerNames }) {
     const centerX = this.scale.width / 2;
     const centerY = this.scale.height / 2;
 
@@ -200,26 +200,41 @@ class GameScene extends Phaser.Scene {
     this.difficulty = difficulty;
     this.addends = addends;
     this.score = score;
+    this.playerNames = playerNames || Array(columnCount).fill("");
 
     this.columns = [];
     this.correctAnswers = [];
     this.inputs = [];
+    this.nameInputs = [];
     this.checkButtons = [];
     this.resultTexts = [];
     this.columnScores = [];
 
-    const difficultes = [9, 99, 999, 9999, 99999, 999999];
+    const difficulties = [9, 99, 999, 9999, 99999, 999999];
     const numberRange =
-      Math.pow(10, difficultes[difficulty - 1].toString().length) - 1;
+      Math.pow(10, difficulties[difficulty - 1].toString().length) - 1;
 
     for (let i = 0; i < columnCount; i++) {
       const column = this.createColumn(i, numberRange);
       this.columns.push(column);
 
+      const nameInput = this.add.dom(
+        centerX + i * 250 - (this.columnCount - 1) * 125,
+        30,
+        "input",
+        `width: 100px; text-align: center; border: 2px solid #ccc; border-radius: 10px; 
+                    padding: 5px; background-color: ${STYLES.backgroundMainDark}; color: ${STYLES.textWhite}; 
+                    font-size: ${STYLES.fontSizeSmall}; outline: none`
+      );
+      nameInput.setOrigin(0.5);
+      nameInput.node.placeholder = "Имя";
+      nameInput.node.value = this.playerNames[i];
+      this.nameInputs.push(nameInput);
+
       const columnScore = this.add
         .text(
           centerX + i * 250 - (this.columnCount - 1) * 125,
-          50,
+          70,
           `${this.score[i].wins} из ${this.score[i].total}`,
           {
             fontSize: "32px",
@@ -233,20 +248,16 @@ class GameScene extends Phaser.Scene {
         centerX + i * 250 - (this.columnCount - 1) * 125,
         centerY + 100,
         "input",
-        {
-          width: "200px",
-          height: "40px",
-          textAlign: "center",
-          fontSize: STYLES.fontSizeMedium,
-          borderRadius: "5px",
-        }
+        `width: 170px; text-align: center; border: 2px solid #ccc; border-radius: 10px; 
+        padding: 5px; background-color: ${STYLES.backgroundMainDark}; color: ${STYLES.textWhite}; 
+        font-size: ${STYLES.fontSizeSmall}; outline: none`
       );
       this.inputs.push(input);
 
       const checkButton = this.add
         .text(
-          centerX + i * 250 - (this.columnCount - 1) * 125,
-          centerY + 170,
+          centerX + i * 250 - (this.columnCount - 1) * 125 + 3,
+          centerY + 150,
           "Ответить",
           {
             fontSize: STYLES.fontSizeLarge,
@@ -309,10 +320,30 @@ class GameScene extends Phaser.Scene {
       sum += number;
     }
 
+    const columnHeight = 530;
+
+    const border = this.add.graphics();
+    border.fillStyle("", 0.2);
+    border.fillRoundedRect(
+      centerX + index * 250 - (this.columnCount - 1) * 125 - 110,
+      centerY - 330,
+      220,
+      columnHeight,
+      20
+    );
+    border.lineStyle(1, 0xffffff, 1);
+    border.strokeRoundedRect(
+      centerX + index * 250 - (this.columnCount - 1) * 125 - 110,
+      centerY - 330,
+      220,
+      columnHeight,
+      20
+    );
+
     const columnText = this.add
       .text(
         centerX + index * 250 - (this.columnCount - 1) * 125,
-        centerY - 150,
+        centerY - 130,
         column.join("\n"),
         {
           fontSize: "38px",
@@ -324,17 +355,6 @@ class GameScene extends Phaser.Scene {
 
     this.correctAnswers.push(sum);
     return columnText;
-  }
-
-  getRandomNumber(numberRange) {
-    let number = Phaser.Math.Between(1, numberRange);
-    return this.operation === "-"
-      ? -number
-      : this.operation === "+/-"
-      ? Phaser.Math.Between(0, 1)
-        ? number
-        : -number
-      : number;
   }
 
   checkAnswer(columnIndex) {
@@ -377,15 +397,29 @@ class GameScene extends Phaser.Scene {
   }
 
   continueGame() {
+    const updatedPlayerNames = this.nameInputs.map((input) => input.node.value);
     this.scene.restart({
       columnCount: this.columnCount,
       operation: this.operation,
       difficulty: this.difficulty,
       addends: this.addends,
       score: this.score,
+      playerNames: updatedPlayerNames,
     });
   }
+
+  getRandomNumber(numberRange) {
+    let number = Phaser.Math.Between(1, numberRange);
+    return this.operation === "-"
+      ? -number
+      : this.operation === "+/-"
+      ? Phaser.Math.Between(0, 1)
+        ? number
+        : -number
+      : number;
+  }
 }
+
 
 const STYLES = {
   textWhite: "#ffffff",
