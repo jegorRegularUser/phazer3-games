@@ -259,8 +259,8 @@ class GameScene extends Phaser.Scene {
       });
 
     this.backButton = this.add
-      .text(centerX - 87, this.scale.height * 0.9, "Настройки", {
-        fontSize: STYLES.fontSizeMedium,
+      .text(centerX - 92, this.scale.height * 0.85, "Настройки", {
+        fontSize: STYLES.fontSizeLarge,
         color: STYLES.textWhite,
         backgroundColor: STYLES.backgroundSec,
         padding: { x: 10, y: 5 },
@@ -271,8 +271,8 @@ class GameScene extends Phaser.Scene {
       .on("pointerdown", () => this.scene.start("MenuScene"));
 
     this.continueButton = this.add
-      .text(centerX + 93, this.scale.height * 0.9, "Продолжить", {
-        fontSize: STYLES.fontSizeMedium,
+      .text(centerX + 98, this.scale.height * 0.85, "Продолжить", {
+        fontSize: STYLES.fontSizeLarge,
         color: STYLES.textWhite,
         backgroundColor: STYLES.backgroundSecDark,
         padding: { x: 10, y: 5 },
@@ -291,7 +291,7 @@ class GameScene extends Phaser.Scene {
           this.scene.restart({
             mode,
             digitCount: Math.min(digitCount + 1, 4),
-            level: Math.min(level + 1, 5),
+            level: Math.min(level + 1, 7),
             score,
           });
         }

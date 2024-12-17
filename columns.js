@@ -220,11 +220,11 @@ class GameScene extends Phaser.Scene {
 
       const nameInput = this.add.dom(
         centerX + i * 250 - (this.columnCount - 1) * 125,
-        30,
+        40,
         "input",
-        `width: 100px; text-align: center; border: 2px solid #ccc; border-radius: 10px; 
+        `width: 210px; text-align: center; border: 1px solid #ccc; border-radius: 10px; 
                     padding: 5px; background-color: ${STYLES.backgroundMainDark}; color: ${STYLES.textWhite}; 
-                    font-size: ${STYLES.fontSizeSmall}; outline: none`
+                    font-size: ${STYLES.fontSizeLarge}; outline: none`
       );
       nameInput.setOrigin(0.5);
       nameInput.node.placeholder = "Имя";
@@ -234,10 +234,10 @@ class GameScene extends Phaser.Scene {
       const columnScore = this.add
         .text(
           centerX + i * 250 - (this.columnCount - 1) * 125,
-          70,
+          107,
           `${this.score[i].wins} из ${this.score[i].total}`,
           {
-            fontSize: "32px",
+            fontSize: STYLES.fontSizeLarger,
             color: STYLES.textWhite,
           }
         )
@@ -252,6 +252,7 @@ class GameScene extends Phaser.Scene {
         padding: 5px; background-color: ${STYLES.backgroundMainDark}; color: ${STYLES.textWhite}; 
         font-size: ${STYLES.fontSizeSmall}; outline: none`
       );
+      input.node.placeholder = "Ответ";
       this.inputs.push(input);
 
       const checkButton = this.add
@@ -282,7 +283,7 @@ class GameScene extends Phaser.Scene {
     }
 
     this.backButton = this.add
-      .text(centerX - 100, centerY + 290, "Назад", {
+      .text(centerX - 103, centerY + 290, "Настройки", {
         fontSize: STYLES.fontSizeLarge,
         color: STYLES.textWhite,
         backgroundColor: STYLES.backgroundSec,
@@ -293,7 +294,7 @@ class GameScene extends Phaser.Scene {
       .on("pointerdown", () => this.scene.start("MenuScene"));
 
     this.continueButton = this.add
-      .text(centerX + 100, centerY + 290, "Продолжить", {
+      .text(centerX + 107, centerY + 290, "Продолжить", {
         fontSize: STYLES.fontSizeLarge,
         color: STYLES.textWhite,
         backgroundColor: STYLES.backgroundSec,
@@ -323,7 +324,7 @@ class GameScene extends Phaser.Scene {
     const columnHeight = 530;
 
     const border = this.add.graphics();
-    border.fillStyle("", 0.2);
+    border.fillStyle(0x222222, 1);
     border.fillRoundedRect(
       centerX + index * 250 - (this.columnCount - 1) * 125 - 110,
       centerY - 330,
@@ -346,7 +347,7 @@ class GameScene extends Phaser.Scene {
         centerY - 130,
         column.join("\n"),
         {
-          fontSize: "38px",
+          fontSize: STYLES.fontSizeLarger,
           color: STYLES.textWhite,
           align: "center",
         }
@@ -430,7 +431,7 @@ const STYLES = {
   backgroundMain: "#333333",
   backgroundMainDark: "#222222",
   backgroundGreen: "#00aa00",
-
+  fontSizeLarger: "36px",
   fontSizeLarge: "28px",
   fontSizeMedium: "24px",
   fontSizeSmall: "18px",
