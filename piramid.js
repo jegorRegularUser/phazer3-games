@@ -24,7 +24,7 @@ class MenuScene extends Phaser.Scene {
       color: STYLES.textWhite,
     });
 
-    const modeContainer = this.add.container(100, -5);
+    const modeContainer = this.add.container(150, -5);
     this.mode = "Обычный";
     const buttons = ["Обычный", "Усложняющийся"].map((mode, index) => {
       return this.add
@@ -54,14 +54,14 @@ class MenuScene extends Phaser.Scene {
 
     modeContainer.add(buttons);
 
-    const digitCountLabel = this.add.text(0, spacing, "Кол-во цифр:", {
+    const digitCountLabel = this.add.text(0, spacing, "Значение:", {
       fontSize: STYLES.fontSizeMedium,
       color: STYLES.textWhite,
     });
 
     const digitButtons = [1, 2, 3, 4].map((count, index) => {
       return this.add
-        .text(200 + index * 50, spacing, `${count}`, {
+        .text(150 + index * 50, spacing, `${count}`, {
           fontSize: STYLES.fontSizeMedium,
           color: STYLES.textWhite,
           backgroundColor: STYLES.backgroundSec,

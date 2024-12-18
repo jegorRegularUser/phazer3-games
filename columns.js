@@ -250,21 +250,21 @@ class GameScene extends Phaser.Scene {
         "input",
         `width: 170px; text-align: center; border: 2px solid #ccc; border-radius: 10px; 
         padding: 5px; background-color: ${STYLES.backgroundMainDark}; color: ${STYLES.textWhite}; 
-        font-size: ${STYLES.fontSizeSmall}; outline: none`
+        font-size: ${STYLES.fontSizeLarge}; outline: none`
       );
       input.node.placeholder = "Ответ";
       this.inputs.push(input);
 
       const checkButton = this.add
         .text(
-          centerX + i * 250 - (this.columnCount - 1) * 125 + 3,
-          centerY + 150,
+          centerX + i * 250 - (this.columnCount - 1) * 125,
+          centerY + 160,
           "Ответить",
           {
             fontSize: STYLES.fontSizeLarge,
             color: STYLES.textWhite,
             backgroundColor: STYLES.backgroundGreen,
-            padding: { x: 20, y: 10 },
+            padding: { x: 25, y: 10 },
           }
         )
         .setOrigin(0.5)
