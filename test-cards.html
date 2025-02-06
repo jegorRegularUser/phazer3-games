@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .container {
+            position: relative;
+            width: 300px;
+            height: 500px;
+            margin: 20px auto;
+            background: #b0bec5;
+        }
+        
+        .center-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #333;
+        }
+        
+        .divider {
+            position: absolute;
+            left: 20%;
+            right: 20%;
+            top: 45%;
+            height: 2px;
+            background: #fff;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="center-line"></div>
+        <div class="divider"></div>
+    </div>
+
+<script>
+class AbacusController {
+    constructor() {
+        this.elements = [];
+        this.bottomElements = [];
+        this.init();
+    }
+
+    init() {
+        this.createElements();
+        this.setupEventListeners();
+    }
+
+    createElements() {
+        const container = document.querySelector('.container');
+        
+        // Верхний шестиугольник
+        this.createHexagon({
+            id: 'top',
+            startPos: 15,
+            activePos: 40,
+            type: 'top'
+        }, container);
+
+        // Нижние шестиугольники (снизу вверх)
+        const positions = [90, 80, 70, 60];
+        positions.forEach((pos, index) => {
+            const element = this.createHexagon({
+                id: `bot${index}`,
+                startPos: pos,
+                activePos: 0,
+                type: 'bottom',
+                order: index
+            }, container);
+            this.bottomElements.push(element);
+        });
+    }
+
+    createHexagon(params, parent) {
+        const hex = document.createElement('div');
+        hex.className = `hexagon ${params.type}`;
+        
+        Object.assign(hex.style, {
+            position: 'absolute',
+            left: '50%',
+            top: `${params.startPos}%`,
+            transform: 'translate(-50%, -50%)',
+            width: '50px',
+            height: '22px',
+            backgroundColor: '#fff',
+            clipPath: 'polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%)',
+            cursor: 'pointer',
+            transition: 'all 0.3s',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+        });
+        
+        const elementData = {
+            element: hex,
+            isActive: false,
+            startPos: params.startPos,
+            activePos: params.activePos,
+            type: params.type,
+            order: params.order || 0
+        };
+        
+        this.elements.push(elementData);
+        parent.appendChild(hex);
+        return elementData;
+    }
+
+    setupEventListeners() {
+        this.elements.forEach(el => {
+            el.element.addEventListener('click', () => {
+                this.handleElementClick(el);
+            });
+        });
+    }
+
+    handleElementClick(element) {
+        if (element.type === 'top') {
+            this.handleTopClick(element);
+        } else {
+            this.handleBottomClick(element);
+        }
+    }
+
+    handleTopClick(element) {
+        const targetPosition = element.isActive ? 
+            element.startPos : 
+            element.activePos;
+        
+        element.element.style.top = `${targetPosition}%`;
+        element.element.style.backgroundColor = element.isActive ? '#fff' : '#2c3e50';
+        element.isActive = !element.isActive;
+    }
+
+    handleBottomClick(clickedElement) {
+        const activeElements = this.bottomElements.filter(el => el.isActive);
+        const isActivating = !clickedElement.isActive;
+        const clickOrder = clickedElement.order;
+
+        // Определяем диапазон элементов для изменения
+        const elementsToChange = isActivating 
+            ? this.bottomElements.filter(el => el.order >= clickOrder)
+            : this.bottomElements.filter(el => el.order <= clickOrder);
+
+        // Обновляем состояние и позиции
+        elementsToChange.forEach(el => {
+            el.isActive = isActivating;
+            el.element.style.backgroundColor = isActivating ? '#2c3e50' : '#fff';
+            this.updatePosition(el);
+        });
+
+        // Корректируем позиции всех элементов
+        this.adjustBottomPositions();
+    }
+
+    updatePosition(element) {
+        element.element.style.top = `${element.isActive ? 
+            this.calculateActivePosition(element) : 
+            element.startPos}%`;
+    }
+
+    calculateActivePosition(element) {
+        const activeCount = this.bottomElements.filter(el => el.isActive).length;
+        return (activeCount * 2); // Динамическое позиционирование
+    }
+
+    adjustBottomPositions() {
+        let activeIndex = 0;
+        this.bottomElements.forEach(el => {
+            if(el.isActive) {
+                el.element.style.top = `${50 + (activeIndex * 5)}%`;
+                activeIndex++;
+            } else {
+                el.element.style.top = `${el.startPos}%`;
+            }
+        });
+    }
+}
+
+new AbacusController();
+</script>
+</body>
+</html>
