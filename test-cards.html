@@ -3,13 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <style>
+        #mainContainer {
+            display: flex;
+
+            padding: 20px 0;
+            background: #b0bec5;
+            white-space: nowrap;
+        }
+        
         .container {
             position: relative;
             width: var(--width);
             height: var(--height);
             background: #b0bec5;
             display: inline-block;
-            margin: var(--margin);
+            margin: 0 15px;
+            flex-shrink: 0;
         }
         
         .center-line {
@@ -58,18 +67,17 @@
 
 <script>
 const config = {
-    count: 10, // Количество абакусов
-    width: '300px', // Ширина каждого контейнера
-    height: '350px', // Высота каждого контейнера
-    margin: '10px', // Расстояние между контейнерами
-    hexWidth: '50px', // Ширина шестиугольника
-    hexHeight: '30px', // Высота шестиугольника
-    topPos: '15%', // Позиция верхнего шестиугольника
-    bottomPos: '90%', // Позиция нижнего шестиугольника
-    dividerLeft: '20%', // Позиция делителя слева
-    dividerRight: '20%', // Позиция делителя справа
-    dividerTop: '45%', // Позиция делителя сверху
-    gap: '10%' // Расстояние между шестиугольниками
+    count: 3,
+    width: '120px',
+    height: '350px',
+    hexWidth: '50px',
+    hexHeight: '25px',
+    topPos: '15%',
+    bottomPos: '90%',
+    dividerLeft: '0%',
+    dividerRight: '0%',
+    dividerTop: '45%',
+    gap: '0%'
 };
 
 class AbacusController {
@@ -98,7 +106,6 @@ class Abacus {
         this.container.className = 'container';
         this.container.style.setProperty('--width', config.width);
         this.container.style.setProperty('--height', config.height);
-        this.container.style.setProperty('--margin', config.margin);
         this.container.style.setProperty('--hex-width', config.hexWidth);
         this.container.style.setProperty('--hex-height', config.hexHeight);
         this.container.style.setProperty('--top-pos', config.topPos);
@@ -174,6 +181,7 @@ class Abacus {
         return elementData;
     }
 
+
     setupEventListeners() {
         this.elements.forEach(el => {
             el.element.addEventListener('click', () => {
@@ -205,19 +213,16 @@ class Abacus {
         const isActivating = !clickedElement.isActive;
         const clickOrder = clickedElement.order;
 
-        // Определяем диапазон элементов для изменения
         const elementsToChange = isActivating 
             ? this.bottomElements.filter(el => el.order >= clickOrder)
             : this.bottomElements.filter(el => el.order <= clickOrder);
 
-        // Обновляем состояние и позиции
         elementsToChange.forEach(el => {
             el.isActive = isActivating;
             el.element.style.backgroundColor = isActivating ? '#2c3e50' : '#fff';
             this.updatePosition(el);
         });
 
-        // Корректируем позиции всех элементов
         this.adjustBottomPositions();
     }
 
@@ -229,7 +234,7 @@ class Abacus {
 
     calculateActivePosition(element) {
         const activeCount = this.bottomElements.filter(el => el.isActive).length;
-        return (activeCount * 10); // Динамическое позиционирование
+        return (activeCount * 10);
     }
 
     adjustBottomPositions() {
