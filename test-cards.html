@@ -5,10 +5,11 @@
     <style>
         .container {
             position: relative;
-            width: 300px;
-            height: 500px;
-            margin: 20px auto;
+            width: var(--width);
+            height: var(--height);
             background: #b0bec5;
+            display: inline-block;
+            margin: var(--margin);
         }
         
         .center-line {
@@ -22,46 +23,113 @@
         
         .divider {
             position: absolute;
-            left: 20%;
-            right: 20%;
-            top: 45%;
+            left: var(--divider-left);
+            right: var(--divider-right);
+            top: var(--divider-top);
             height: 2px;
             background: #fff;
             z-index: 2;
         }
+        
+        .hexagon {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: var(--hex-width);
+            height: var(--hex-height);
+            background-color: #fff;
+            clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .hexagon.top {
+            top: var(--top-pos);
+        }
+        
+        .hexagon.bottom {
+            top: var(--bottom-pos);
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="center-line"></div>
-        <div class="divider"></div>
-    </div>
+    <div id="mainContainer"></div>
 
 <script>
+const config = {
+    count: 10, // Количество абакусов
+    width: '300px', // Ширина каждого контейнера
+    height: '350px', // Высота каждого контейнера
+    margin: '10px', // Расстояние между контейнерами
+    hexWidth: '50px', // Ширина шестиугольника
+    hexHeight: '30px', // Высота шестиугольника
+    topPos: '15%', // Позиция верхнего шестиугольника
+    bottomPos: '90%', // Позиция нижнего шестиугольника
+    dividerLeft: '20%', // Позиция делителя слева
+    dividerRight: '20%', // Позиция делителя справа
+    dividerTop: '45%', // Позиция делителя сверху
+    gap: '10%' // Расстояние между шестиугольниками
+};
+
 class AbacusController {
     constructor() {
+        this.mainContainer = document.getElementById('mainContainer');
+        this.controllers = [];
+        this.init();
+    }
+
+    init() {
+        for (let i = 0; i < config.count; i++) {
+            this.createAbacus();
+        }
+    }
+
+    createAbacus() {
+        const abacus = new Abacus(this.mainContainer);
+        this.controllers.push(abacus);
+    }
+}
+
+class Abacus {
+    constructor(parent) {
+        this.parent = parent;
+        this.container = document.createElement('div');
+        this.container.className = 'container';
+        this.container.style.setProperty('--width', config.width);
+        this.container.style.setProperty('--height', config.height);
+        this.container.style.setProperty('--margin', config.margin);
+        this.container.style.setProperty('--hex-width', config.hexWidth);
+        this.container.style.setProperty('--hex-height', config.hexHeight);
+        this.container.style.setProperty('--top-pos', config.topPos);
+        this.container.style.setProperty('--bottom-pos', config.bottomPos);
+        this.container.style.setProperty('--divider-left', config.dividerLeft);
+        this.container.style.setProperty('--divider-right', config.dividerRight);
+        this.container.style.setProperty('--divider-top', config.dividerTop);
+        
         this.elements = [];
         this.bottomElements = [];
         this.init();
     }
 
     init() {
-        this.createElements();
-        this.setupEventListeners();
-    }
-
-    createElements() {
-        const container = document.querySelector('.container');
+        this.parent.appendChild(this.container);
         
-        // Верхний шестиугольник
+        const centerLine = document.createElement('div');
+        centerLine.className = 'center-line';
+        this.container.appendChild(centerLine);
+        
+        const divider = document.createElement('div');
+        divider.className = 'divider';
+        this.container.appendChild(divider);
+        
         this.createHexagon({
             id: 'top',
-            startPos: 15,
-            activePos: 40,
+            startPos: parseInt(config.topPos.replace('%', '')),
+            activePos: parseInt(config.topPos.replace('%', '')) + 25,
             type: 'top'
-        }, container);
+        });
 
-        // Нижние шестиугольники (снизу вверх)
         const positions = [90, 80, 70, 60];
         positions.forEach((pos, index) => {
             const element = this.createHexagon({
@@ -70,22 +138,21 @@ class AbacusController {
                 activePos: 0,
                 type: 'bottom',
                 order: index
-            }, container);
+            });
             this.bottomElements.push(element);
         });
+
+        this.setupEventListeners();
     }
 
-    createHexagon(params, parent) {
+    createHexagon(params) {
         const hex = document.createElement('div');
         hex.className = `hexagon ${params.type}`;
         
         Object.assign(hex.style, {
-            position: 'absolute',
-            left: '50%',
             top: `${params.startPos}%`,
-            transform: 'translate(-50%, -50%)',
-            width: '50px',
-            height: '22px',
+            width: config.hexWidth,
+            height: config.hexHeight,
             backgroundColor: '#fff',
             clipPath: 'polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%)',
             cursor: 'pointer',
@@ -103,7 +170,7 @@ class AbacusController {
         };
         
         this.elements.push(elementData);
-        parent.appendChild(hex);
+        this.container.appendChild(hex);
         return elementData;
     }
 
@@ -162,14 +229,14 @@ class AbacusController {
 
     calculateActivePosition(element) {
         const activeCount = this.bottomElements.filter(el => el.isActive).length;
-        return (activeCount * 2); // Динамическое позиционирование
+        return (activeCount * 10); // Динамическое позиционирование
     }
 
     adjustBottomPositions() {
         let activeIndex = 0;
         this.bottomElements.forEach(el => {
             if(el.isActive) {
-                el.element.style.top = `${50 + (activeIndex * 5)}%`;
+                el.element.style.top = `${50 + (activeIndex * 10)}%`;
                 activeIndex++;
             } else {
                 el.element.style.top = `${el.startPos}%`;
