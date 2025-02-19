@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <style></style>
+    <!DOCTYPE html>
+    <html lang="ru">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="style.css" />
+        <title>Пирамида сложения</title>
+      </head>
+      <body>
+        <style>
+          body {
+            background-color: #333;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+          }
+          #menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 50px auto;
+          }
+          .settings {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+          }
+          button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 18px;
+            border: none;
+            background-color: #555;
+            color: white;
+            cursor: pointer;
+          }
+
+          button.active {
+            background-color: #00aa00;
+          }
+
+          .pyramid-row {
+            display: flex;
+            justify-content: center;
+            margin: 10px;
+          }
+
+          .pyramid-input {
+            margin: 5px;
+            padding: 5px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+          }
+        </style>
+        <div id="menu">
+          <h1>Настройки игры</h1>
+          <div  class="settings">
+            <div>
+              <label>Режим:</label>
+              <button class="mode-button active" data-mode="Обычный">
+                Обычный
+              </button>
+              <button class="mode-button" data-mode="Усложняющийся">
+                Усложняющийся
+              </button>
+            </div>
+            <div>
+              <label>Значение:</label>
+              <button class="digit-button active" data-value="1">1</button>
+              <button class="digit-button" data-value="2">2</button>
+              <button class="digit-button" data-value="3">3</button>
+              <button class="digit-button" data-value="4">4</button>
+            </div>
+            <div>
+              <label>Уровень:</label>
+              <button class="level-button active" data-level="3">1</button>
+              <button class="level-button" data-level="4">2</button>
+              <button class="level-button" data-level="5">3</button>
+              <button class="level-button" data-level="6">4</button>
+              <button class="level-button" data-level="7">5</button>
+            </div>
+          </div>
+          <button id="start-button">Старт</button>
+        </div>
+
+        <div id="game" style="display: none">
+          <h2>Счет: <span id="score">0</span></h2>
+          <div id="pyramid"></div>
+          <button id="check-button">Проверить</button>
+          <button id="back-button">Назад</button>
+          <button id="continue-button" disabled>Продолжить</button>
+        </div>
+
+        <script src="piramid.js"></script>
+      </body>
+    </html>
+
+    <script>
+      //Все переменные снизу
+      document.addEventListener("DOMContentLoaded", () => {
+        let mode = "Обычный";
+        let digitCount = 1;
+        let level = 3;
+        let score = 0;
+        let inputs = [];
+
+        const menu = document.getElementById("menu");
+        const game = document.getElementById("game");
+        const pyramidContainer = document.getElementById("pyramid");
+        const scoreText = document.getElementById("score");
+
+        document.querySelectorAll(".mode-button").forEach((button) => {
+          button.addEventListener("click", () => {
+            mode = button.dataset.mode;
+            document
+              .querySelectorAll(".mode-button")
+              .forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+          });
+        });
+
+        document.querySelectorAll(".digit-button").forEach((button) => {
+          button.addEventListener("click", () => {
+            digitCount = parseInt(button.dataset.value);
+            document
+              .querySelectorAll(".digit-button")
+              .forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+          });
+        });
+
+        document.querySelectorAll(".level-button").forEach((button) => {
+          button.addEventListener("click", () => {
+            level = parseInt(button.dataset.level);
+            document
+              .querySelectorAll(".level-button")
+              .forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+          });
+        });
+
+        document
+          .getElementById("start-button")
+          .addEventListener("click", () => {
+            menu.style.display = "none";
+            game.style.display = "block";
+            startGame();
+          });
+
+        document.getElementById("back-button").addEventListener("click", () => {
+          game.style.display = "none";
+          menu.style.display = "block";
+        });
+
+        document
+          .getElementById("check-button")
+          .addEventListener("click", () => {
+            inputs.forEach(({ input, correctValue }) => {
+              if (parseInt(input.value) === correctValue) {
+                input.style.backgroundColor = "#90EE90";
+                input.style.color = "#004400";
+                input.dataset.correct = "true";
+              } else {
+                input.style.backgroundColor = "#FFB6C1";
+                input.style.color = "#440000";
+                input.dataset.correct = "false";
+              }
+            });
+
+            const allCorrect = inputs.every(
+              ({ input }) => input.dataset.correct === "true"
+            );
+            const continueButton = document.getElementById("continue-button");
+            if (allCorrect) {
+              continueButton.disabled = false;
+              continueButton.style.backgroundColor = "#00aa00";
+            }
+          });
+
+        document
+          .getElementById("continue-button")
+          .addEventListener("click", () => {
+            if (mode === "Обычный") {
+              score++;
+            } else {
+              digitCount = Math.min(digitCount + 1, 4);
+              level = Math.min(level + 1, 7);
+              score++;
+            }
+            scoreText.textContent = score;
+            startGame();
+          });
+
+        function startGame() {
+          pyramidContainer.innerHTML = "";
+          inputs = [];
+
+          const baseRow = Array.from(
+            { length: level },
+            () =>
+              Math.floor(
+                Math.random() *
+                  (Math.pow(10, digitCount) - Math.pow(10, digitCount - 1))
+              ) + Math.pow(10, digitCount - 1)
+          );
+
+          const rows = [baseRow];
+          for (let i = 0; i < level - 1; i++) {
+            const prevRow = rows[0];
+            const newRow = [];
+            for (let j = 0; j < prevRow.length - 1; j++) {
+              newRow.push(prevRow[j] + prevRow[j + 1]);
+            }
+            rows.unshift(newRow);
+          }
+
+          rows.forEach((row, rowIndex) => {
+            const rowDiv = document.createElement("div");
+            rowDiv.classList.add("pyramid-row");
+
+            row.forEach((value, valueIndex) => {
+              const input = document.createElement("input");
+              input.type = "text";
+              input.classList.add("pyramid-input");
+              input.style.width = "60px";
+              input.style.textAlign = "center";
+
+              if (rowIndex === rows.length - 1) {
+                input.value = value;
+                input.readOnly = true;
+              } else {
+                inputs.push({ input, correctValue: value });
+              }
+
+              rowDiv.appendChild(input);
+            });
+
+            pyramidContainer.appendChild(rowDiv);
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
