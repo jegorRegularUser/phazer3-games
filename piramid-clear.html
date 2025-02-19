@@ -1,257 +1,356 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    <style></style>
-    <!DOCTYPE html>
-    <html lang="ru">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="style.css" />
-        <title>Пирамида сложения</title>
-      </head>
-      <body>
-        <style>
-          body {
-            background-color: #333;
-            color: white;
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пирамида сложения</title>
+    <style>
+        body {
             font-family: Arial, sans-serif;
+            background-color: #333333;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-container {
             text-align: center;
-          }
-          #menu {
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .settings-container {
+            background-color: #222222;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: 400px;
+        }
+
+        .setting-row {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        label {
+            font-size: 18px;
+            margin-right: 10px;
+            width: 80px;
+            text-align: left;
+        }
+
+        button {
+            font-size: 18px;
+            color: #ffffff;
+            background-color: #555555;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button.selected {
+            background-color: #00aa00;
+        }
+
+        #pyramid-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            margin: 50px auto;
-          }
-          .settings {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            margin: 10px;
-            padding: 10px;
-            border-radius: 5px;
-          }
-          button {
-            margin: 5px;
-            padding: 10px;
-            font-size: 18px;
-            border: none;
-            background-color: #555;
-            color: white;
-            cursor: pointer;
-          }
+            margin-bottom: 20px;
+        }
 
-          button.active {
-            background-color: #00aa00;
-          }
-
-          .pyramid-row {
+        .row {
             display: flex;
             justify-content: center;
-            margin: 10px;
-          }
+            margin-bottom: 5px;
+        }
 
-          .pyramid-input {
-            margin: 5px;
-            padding: 5px;
+        input {
+            width: 60px;
+            text-align: center;
             border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 5px;
+            background-color: #222222;
+            color: #ffffff;
+            font-size: 18px;
+            outline: none;
+            margin: 0 5px;
+        }
+
+        input:read-only {
+            background-color: #444444;
+        }
+
+        #check-button, #continue-button, #settings-button {
+            font-size: 24px;
+            color: #ffffff;
+            padding: 10px 20px;
+            border: none;
             border-radius: 5px;
-          }
-        </style>
-        <div id="menu">
-          <h1>Настройки игры</h1>
-          <div  class="settings">
-            <div>
-              <label>Режим:</label>
-              <button class="mode-button active" data-mode="Обычный">
-                Обычный
-              </button>
-              <button class="mode-button" data-mode="Усложняющийся">
-                Усложняющийся
-              </button>
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        #check-button {
+            background-color: #00aa00;
+        }
+
+        #continue-button {
+            background-color: #444444;
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        #settings-button {
+            background-color: #555555; /* Grey color for settings button */
+        }
+
+        #score {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .correct {
+            background-color: #90EE90 !important;
+            color: #004400 !important;
+        }
+
+        .incorrect {
+            background-color: #FFB6C1 !important;
+            color: #440000 !important;
+        }
+
+        #options-container {
+            display: flex;
+        }
+
+        a {
+            color: white;
+        }
+
+        #game-options-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1 id="title">Настройки игры</h1>
+
+        <div id="settings-container" class="settings-container">
+            <div class="setting-row">
+                <label>Режим:</label>
+                <div id="mode-container">
+                    <button data-mode="Обычный" class="mode-button selected">Обычный</button>
+                    <button data-mode="Усложняющийся" class="mode-button">Усложняющийся</button>
+                </div>
             </div>
-            <div>
-              <label>Значение:</label>
-              <button class="digit-button active" data-value="1">1</button>
-              <button class="digit-button" data-value="2">2</button>
-              <button class="digit-button" data-value="3">3</button>
-              <button class="digit-button" data-value="4">4</button>
+
+            <div class="setting-row">
+                <label>Значение:</label>
+                <div id="digit-container">
+                    <button data-digit="1" class="digit-button">1</button>
+                    <button data-digit="2" class="digit-button selected">2</button>
+                    <button data-digit="3" class="digit-button">3</button>
+                    <button data-digit="4" class="digit-button">4</button>
+                </div>
             </div>
-            <div>
-              <label>Уровень:</label>
-              <button class="level-button active" data-level="3">1</button>
-              <button class="level-button" data-level="4">2</button>
-              <button class="level-button" data-level="5">3</button>
-              <button class="level-button" data-level="6">4</button>
-              <button class="level-button" data-level="7">5</button>
+
+            <div class="setting-row">
+                <label>Уровень:</label>
+                <div id="level-container">
+                    <button data-level="3" class="level-button selected">1</button>
+                    <button data-level="4" class="level-button">2</button>
+                    <button data-level="5" class="level-button">3</button>
+                    <button data-level="6" class="level-button">4</button>
+                    <button data-level="7" class="level-button">5</button>
+                </div>
             </div>
-          </div>
-          <button id="start-button">Старт</button>
+
+            <div id="options-container">
+                <button id="start-button">Старт</button>
+                <button id="back-button"><a href="index.html">Назад</a></button>
+            </div>
         </div>
 
-        <div id="game" style="display: none">
-          <h2>Счет: <span id="score">0</span></h2>
-          <div id="pyramid"></div>
-          <button id="check-button">Проверить</button>
-          <button id="back-button">Назад</button>
-          <button id="continue-button" disabled>Продолжить</button>
+        <div id="game-screen" style="display: none;">
+            <div id="score">Счет: 0</div>
+            <div id="pyramid-container"></div>
+            <div id="game-options-container">
+                <button id="check-button">Проверить</button>
+                <button id="continue-button">Продолжить</button>
+                <button id="settings-button">Настройки</button>
+            </div>
         </div>
-
-        <script src="piramid.js"></script>
-      </body>
-    </html>
+    </div>
 
     <script>
-      //Все переменные снизу
-      document.addEventListener("DOMContentLoaded", () => {
+        const title = document.getElementById('title');
+        const settingsContainer = document.getElementById('settings-container');
+        const gameScreen = document.getElementById('game-screen');
+        const modeContainer = document.getElementById('mode-container');
+        const digitContainer = document.getElementById('digit-container');
+        const levelContainer = document.getElementById('level-container');
+        const startButton = document.getElementById('start-button');
+        const pyramidContainer = document.getElementById('pyramid-container');
+        const checkButton = document.getElementById('check-button');
+        const continueButton = document.getElementById('continue-button');
+        const settingsButton = document.getElementById('settings-button');
+        const scoreDisplay = document.getElementById('score');
+
         let mode = "Обычный";
-        let digitCount = 1;
+        let digitCount = 2;
         let level = 3;
         let score = 0;
         let inputs = [];
+        let checkButtonWasClicked = false; // Track if "Проверить" was clicked
 
-        const menu = document.getElementById("menu");
-        const game = document.getElementById("game");
-        const pyramidContainer = document.getElementById("pyramid");
-        const scoreText = document.getElementById("score");
-
-        document.querySelectorAll(".mode-button").forEach((button) => {
-          button.addEventListener("click", () => {
-            mode = button.dataset.mode;
-            document
-              .querySelectorAll(".mode-button")
-              .forEach((btn) => btn.classList.remove("active"));
-            button.classList.add("active");
-          });
+        modeContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('mode-button')) {
+                mode = event.target.dataset.mode;
+                document.querySelectorAll('.mode-button').forEach(button => {
+                    button.classList.remove('selected');
+                });
+                event.target.classList.add('selected');
+            }
         });
 
-        document.querySelectorAll(".digit-button").forEach((button) => {
-          button.addEventListener("click", () => {
-            digitCount = parseInt(button.dataset.value);
-            document
-              .querySelectorAll(".digit-button")
-              .forEach((btn) => btn.classList.remove("active"));
-            button.classList.add("active");
-          });
+        digitContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('digit-button')) {
+                digitCount = parseInt(event.target.dataset.digit);
+                document.querySelectorAll('.digit-button').forEach(button => {
+                    button.classList.remove('selected');
+                });
+                event.target.classList.add('selected');
+            }
         });
 
-        document.querySelectorAll(".level-button").forEach((button) => {
-          button.addEventListener("click", () => {
-            level = parseInt(button.dataset.level);
-            document
-              .querySelectorAll(".level-button")
-              .forEach((btn) => btn.classList.remove("active"));
-            button.classList.add("active");
-          });
+        levelContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('level-button')) {
+                level = parseInt(event.target.dataset.level);
+                document.querySelectorAll('.level-button').forEach(button => {
+                    button.classList.remove('selected');
+                });
+                event.target.classList.add('selected');
+            }
         });
 
-        document
-          .getElementById("start-button")
-          .addEventListener("click", () => {
-            menu.style.display = "none";
-            game.style.display = "block";
+        startButton.addEventListener('click', () => {
+            title.style.display = 'none';
+            settingsContainer.style.display = 'none';
+            gameScreen.style.display = 'block';
             startGame();
-          });
-
-        document.getElementById("back-button").addEventListener("click", () => {
-          game.style.display = "none";
-          menu.style.display = "block";
         });
 
-        document
-          .getElementById("check-button")
-          .addEventListener("click", () => {
-            inputs.forEach(({ input, correctValue }) => {
-              if (parseInt(input.value) === correctValue) {
-                input.style.backgroundColor = "#90EE90";
-                input.style.color = "#004400";
-                input.dataset.correct = "true";
-              } else {
-                input.style.backgroundColor = "#FFB6C1";
-                input.style.color = "#440000";
-                input.dataset.correct = "false";
-              }
+        checkButton.addEventListener('click', () => {
+            let allCorrect = true;
+            inputs.forEach(input => {
+                const inputValue = parseInt(input.element.value);
+                if (inputValue === input.correctValue) {
+                    input.element.classList.add('correct');
+                    input.element.classList.remove('incorrect');
+                    input.correctCheck = true;
+                } else {
+                    input.element.classList.add('incorrect');
+                    input.element.classList.remove('correct');
+                    input.correctCheck = false;
+                    allCorrect = false;
+                }
             });
 
-            const allCorrect = inputs.every(
-              ({ input }) => input.dataset.correct === "true"
-            );
-            const continueButton = document.getElementById("continue-button");
-            if (allCorrect) {
-              continueButton.disabled = false;
-              continueButton.style.backgroundColor = "#00aa00";
-            }
-          });
+            checkButtonWasClicked = true; // Mark "Проверить" as clicked
 
-        document
-          .getElementById("continue-button")
-          .addEventListener("click", () => {
-            if (mode === "Обычный") {
-              score++;
+            if (allCorrect) {
+                continueButton.style.backgroundColor = '#00aa00';
+                continueButton.style.cursor = 'pointer';
+                continueButton.style.opacity = '1';
             } else {
-              digitCount = Math.min(digitCount + 1, 4);
-              level = Math.min(level + 1, 7);
-              score++;
+                continueButton.style.backgroundColor = '#444444';
+                continueButton.style.cursor = 'default';
+                continueButton.style.opacity = '0.5';
             }
-            scoreText.textContent = score;
-            startGame();
-          });
+        });
+
+        continueButton.addEventListener('click', () => {
+            if (!checkButtonWasClicked) return; // Prevent continue if "Проверить" wasn't clicked
+            if (inputs.every(input => input.correctCheck)) {
+                score++;
+            }
+
+            if (mode === "Обычный") {
+                startGame();
+            } else {
+                digitCount = Math.min(digitCount + 1, 4);
+                level = Math.min(level + 1, 7);
+                startGame();
+            }
+        });
+
+        settingsButton.addEventListener('click', () => {
+            gameScreen.style.display = 'none';
+            settingsContainer.style.display = 'block';
+            title.style.display = 'block';
+        });
 
         function startGame() {
-          pyramidContainer.innerHTML = "";
-          inputs = [];
+            pyramidContainer.innerHTML = '';
+            inputs = [];
+            scoreDisplay.textContent = `Счет: ${score}`;
+            continueButton.style.backgroundColor = '#444444';
+            continueButton.style.cursor = 'default';
+            continueButton.style.opacity = '0.5';
+            checkButtonWasClicked = false; // Reset the flag for the new game
 
-          const baseRow = Array.from(
-            { length: level },
-            () =>
-              Math.floor(
-                Math.random() *
-                  (Math.pow(10, digitCount) - Math.pow(10, digitCount - 1))
-              ) + Math.pow(10, digitCount - 1)
-          );
+            const baseRow = Array.from({ length: level }, () =>
+                Math.floor(Math.random() * (Math.pow(10, digitCount) - Math.pow(10, digitCount - 1))) + Math.pow(10, digitCount - 1)
+            );
+            const rows = [baseRow];
 
-          const rows = [baseRow];
-          for (let i = 0; i < level - 1; i++) {
-            const prevRow = rows[0];
-            const newRow = [];
-            for (let j = 0; j < prevRow.length - 1; j++) {
-              newRow.push(prevRow[j] + prevRow[j + 1]);
+            for (let i = 0; i < level - 1; i++) {
+                const prevRow = rows[0];
+                const newRow = [];
+                for (let j = 0; j < prevRow.length - 1; j++) {
+                    newRow.push(prevRow[j] + prevRow[j + 1]);
+                }
+                rows.unshift(newRow);
             }
-            rows.unshift(newRow);
-          }
 
-          rows.forEach((row, rowIndex) => {
-            const rowDiv = document.createElement("div");
-            rowDiv.classList.add("pyramid-row");
+            rows.forEach((row, rowIndex) => {
+                const rowElement = document.createElement('div');
+                rowElement.classList.add('row');
 
-            row.forEach((value, valueIndex) => {
-              const input = document.createElement("input");
-              input.type = "text";
-              input.classList.add("pyramid-input");
-              input.style.width = "60px";
-              input.style.textAlign = "center";
+                row.forEach((value, valueIndex) => {
+                    const inputElement = document.createElement('input');
+                    inputElement.type = 'text';
+                    inputElement.value = '';
 
-              if (rowIndex === rows.length - 1) {
-                input.value = value;
-                input.readOnly = true;
-              } else {
-                inputs.push({ input, correctValue: value });
-              }
+                    if (rowIndex === rows.length - 1) {
+                        inputElement.value = value;
+                        inputElement.readOnly = true;
+                    } else {
+                        inputs.push({ element: inputElement, correctValue: value, correctCheck: false });
+                    }
 
-              rowDiv.appendChild(input);
+                    rowElement.appendChild(inputElement);
+                });
+
+                pyramidContainer.appendChild(rowElement);
             });
-
-            pyramidContainer.appendChild(rowDiv);
-          });
         }
-      });
     </script>
-  </body>
+</body>
 </html>
