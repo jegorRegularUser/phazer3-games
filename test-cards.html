@@ -3,14 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <style>
+        /* Общие стили */
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
         #mainContainer {
             display: flex;
-
+            overflow-x: auto;
             padding: 20px 0;
             background: #b0bec5;
             white-space: nowrap;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            visibility: hidden;
         }
-        
+
         .container {
             position: relative;
             width: var(--width);
@@ -19,8 +33,9 @@
             display: inline-block;
             margin: 0 15px;
             flex-shrink: 0;
+            transition: all 0.3s;
         }
-        
+
         .center-line {
             position: absolute;
             left: 50%;
@@ -29,7 +44,7 @@
             width: 2px;
             background: #333;
         }
-        
+
         .divider {
             position: absolute;
             left: var(--divider-left);
@@ -39,7 +54,7 @@
             background: #fff;
             z-index: 2;
         }
-        
+
         .hexagon {
             position: absolute;
             left: 50%;
@@ -52,205 +67,597 @@
             transition: all 0.3s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        
+
         .hexagon.top {
             top: var(--top-pos);
         }
-        
+
         .hexagon.bottom {
             top: var(--bottom-pos);
+        }
+
+        /* Стили для чисел */
+        .number-display {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 20px;
+            color: #fff;
+            z-index: 3;
+            width: 100%;
+        }
+
+        /* Стили для настроек */
+        #settingsContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        #settingsPanel {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 500px;
+        }
+
+        #settingsPanel h2 {
+            margin-top: 0;
+        }
+
+        .setting-row {
+            margin-bottom: 10px;
+        }
+
+        .setting-row label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .setting-row input[type="number"],
+        .setting-row select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Стили для большого режима */
+        #largeModeContainer {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+        }
+
+        #largeModeAbaci {
+            display: flex;
+            overflow-x: auto;
+            padding: 20px 0;
+            white-space: nowrap;
+        }
+
+        #largeModeAbaci .container {
+            margin: 0 15px;
+            width: 200px;
+            height: 400px;
+        }
+
+        .number-display {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 24px;
+            color: #fff;
+            z-index: 3;
+            width: 100%;
+        }
+
+        .large-mode-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Стили для кнопок */
+        .toggle-button {
+            display: inline-block;
+            width: 50px;
+            height: 30px;
+            background-color: #ddd;
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+
+        .toggle-button.active {
+            background-color: #4CAF50;
+        }
+
+        .toggle-button .toggle-slider {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background-color: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-button.active .toggle-slider {
+            transform: translateX(20px);
+        }
+        
+        /* Стили для стрелок */
+        .arrow-button {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            font-size: 20px;
+            background-color: #ddd;
+            border-radius: 50%;
+            cursor: pointer;
+            margin: 0 5px;
         }
     </style>
 </head>
 <body>
+    <!-- Контейнер настроек -->
+    <div id="settingsContainer">
+        <div id="settingsPanel">
+            <h2>Настройки</h2>
+    
+            <div class="setting-row">
+                <label>Режим:</label>
+                <div class="toggle-button" id="normalModeBtn">
+                    <div class="toggle-slider"></div>
+                </div>
+                <div class="toggle-button" id="largeModeBtn">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+    
+            <div class="setting-row">
+                <label>Абакусы:</label>
+                <div class="toggle-buttons" id="abacusCountButtons">
+                    </div>
+            </div>
+    
+            <div class="setting-row">
+                <label>Сложность:</label>
+                <div class="toggle-buttons" id="difficultyButtons">
+                    </div>
+            </div>
+    
+            <div class="setting-row">
+                <label for="rotation">Поворот:</label>
+                <div style="display: flex; align-items: center;">
+                    <div class="arrow-button" id="rotateLeft">&lt;</div>
+                    <input type="number" id="rotation" value="0">
+                    <div class="arrow-button" id="rotateRight">&gt;</div>
+                </div>
+            </div>
+    
+            <div class="setting-row">
+                <label for="interval">Интервал:</label>
+                <div style="display: flex; align-items: center;">
+                    <div class="arrow-button" id="intervalLeft">&lt;</div>
+                    <input type="number" id="interval" value="1">
+                    <div class="arrow-button" id="intervalRight">&gt;</div>
+                </div>
+            </div>
+    
+            <div class="setting-row">
+                <label for="impulses">Импульсы:</label>
+                <div style="display: flex; align-items: center;">
+                    <div class="arrow-button" id="impulsesLeft">&lt;</div>
+                    <input type="number" id="impulses" value="1">
+                    <div class="arrow-button" id="impulsesRight">&gt;</div>
+                </div>
+            </div>
+    
+            <div class="buttons">
+                <button id="applySettingsBtn">Играть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер большого режима -->
+    <div id="largeModeContainer">
+        <div id="largeModeAbaci"></div>
+        <div class="large-mode-buttons">
+            <button id="backToNormalBtn">Назад</button>
+            <button id="showNumbersBtn">Показать Числа</button>
+        </div>
+    </div>
+
+    <!-- Главный контейнер (скрыт изначально) -->
     <div id="mainContainer"></div>
 
 <script>
-const config = {
-    count: 3,
-    width: '120px',
-    height: '350px',
-    hexWidth: '50px',
-    hexHeight: '25px',
-    topPos: '15%',
-    bottomPos: '90%',
-    dividerLeft: '0%',
-    dividerRight: '0%',
-    dividerTop: '45%',
-    gap: '0%'
-};
+    const config = {
+        count: 10,
+        difficulty: 4,
+        rotation: 0,
+        interval: 1,
+        impulses: 1,
+        isLargeMode: false,
+        abacusWidth: '200px',
+        abacusHeight: '400px',
+        abacusTop: '15%',
+        abacusBottom: '90%',
+        dividerLeft: '20%',
+        dividerRight: '20%',
+        dividerTop: '45%'
+    };
 
-class AbacusController {
-    constructor() {
-        this.mainContainer = document.getElementById('mainContainer');
-        this.controllers = [];
-        this.init();
-    }
-
-    init() {
-        for (let i = 0; i < config.count; i++) {
-            this.createAbacus();
+    class AbacusController {
+        constructor() {
+            this.mainContainer = document.getElementById('mainContainer');
+            this.largeModeContainer = document.getElementById('largeModeContainer');
+            this.largeModeAbaci = document.getElementById('largeModeAbaci');
+            this.backToNormalBtn = document.getElementById('backToNormalBtn');
+            this.showNumbersBtn = document.getElementById('showNumbersBtn');
+            this.controllers = [];
+            this.numbersDisplayed = false;
+            this.init();
         }
-    }
 
-    createAbacus() {
-        const abacus = new Abacus(this.mainContainer);
-        this.controllers.push(abacus);
-    }
-}
-
-class Abacus {
-    constructor(parent) {
-        this.parent = parent;
-        this.container = document.createElement('div');
-        this.container.className = 'container';
-        this.container.style.setProperty('--width', config.width);
-        this.container.style.setProperty('--height', config.height);
-        this.container.style.setProperty('--hex-width', config.hexWidth);
-        this.container.style.setProperty('--hex-height', config.hexHeight);
-        this.container.style.setProperty('--top-pos', config.topPos);
-        this.container.style.setProperty('--bottom-pos', config.bottomPos);
-        this.container.style.setProperty('--divider-left', config.dividerLeft);
-        this.container.style.setProperty('--divider-right', config.dividerRight);
-        this.container.style.setProperty('--divider-top', config.dividerTop);
-        
-        this.elements = [];
-        this.bottomElements = [];
-        this.init();
-    }
-
-    init() {
-        this.parent.appendChild(this.container);
-        
-        const centerLine = document.createElement('div');
-        centerLine.className = 'center-line';
-        this.container.appendChild(centerLine);
-        
-        const divider = document.createElement('div');
-        divider.className = 'divider';
-        this.container.appendChild(divider);
-        
-        this.createHexagon({
-            id: 'top',
-            startPos: parseInt(config.topPos.replace('%', '')),
-            activePos: parseInt(config.topPos.replace('%', '')) + 25,
-            type: 'top'
-        });
-
-        const positions = [90, 80, 70, 60];
-        positions.forEach((pos, index) => {
-            const element = this.createHexagon({
-                id: `bot${index}`,
-                startPos: pos,
-                activePos: 0,
-                type: 'bottom',
-                order: index
-            });
-            this.bottomElements.push(element);
-        });
-
-        this.setupEventListeners();
-    }
-
-    createHexagon(params) {
-        const hex = document.createElement('div');
-        hex.className = `hexagon ${params.type}`;
-        
-        Object.assign(hex.style, {
-            top: `${params.startPos}%`,
-            width: config.hexWidth,
-            height: config.hexHeight,
-            backgroundColor: '#fff',
-            clipPath: 'polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%)',
-            cursor: 'pointer',
-            transition: 'all 0.3s',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
-        });
-        
-        const elementData = {
-            element: hex,
-            isActive: false,
-            startPos: params.startPos,
-            activePos: params.activePos,
-            type: params.type,
-            order: params.order || 0
-        };
-        
-        this.elements.push(elementData);
-        this.container.appendChild(hex);
-        return elementData;
-    }
-
-
-    setupEventListeners() {
-        this.elements.forEach(el => {
-            el.element.addEventListener('click', () => {
-                this.handleElementClick(el);
-            });
-        });
-    }
-
-    handleElementClick(element) {
-        if (element.type === 'top') {
-            this.handleTopClick(element);
-        } else {
-            this.handleBottomClick(element);
+        init() {
+            this.settingsPanel = new SettingsPanel(this);
+            this.applySettings();
+            this.setupEventListeners();
         }
-    }
 
-    handleTopClick(element) {
-        const targetPosition = element.isActive ? 
-            element.startPos : 
-            element.activePos;
-        
-        element.element.style.top = `${targetPosition}%`;
-        element.element.style.backgroundColor = element.isActive ? '#fff' : '#2c3e50';
-        element.isActive = !element.isActive;
-    }
+        setupEventListeners() {
+            this.backToNormalBtn.addEventListener('click', () => {
+                this.showNormalMode();
+            });
 
-    handleBottomClick(clickedElement) {
-        const activeElements = this.bottomElements.filter(el => el.isActive);
-        const isActivating = !clickedElement.isActive;
-        const clickOrder = clickedElement.order;
+            this.showNumbersBtn.addEventListener('click', () => {
+                this.toggleNumbers();
+            });
+        }
 
-        const elementsToChange = isActivating 
-            ? this.bottomElements.filter(el => el.order >= clickOrder)
-            : this.bottomElements.filter(el => el.order <= clickOrder);
+        applySettings() {
+            document.getElementById('settingsContainer').style.display = 'none';
 
-        elementsToChange.forEach(el => {
-            el.isActive = isActivating;
-            el.element.style.backgroundColor = isActivating ? '#2c3e50' : '#fff';
-            this.updatePosition(el);
-        });
+            // Показать главный контейнер
+            this.mainContainer.style.visibility = 'visible';
+            this.mainContainer.style.position = 'relative';
 
-        this.adjustBottomPositions();
-    }
+            this.resetAbaci();
+        }
 
-    updatePosition(element) {
-        element.element.style.top = `${element.isActive ? 
-            this.calculateActivePosition(element) : 
-            element.startPos}%`;
-    }
+        resetAbaci() {
+            this.controllers = [];
+            this.mainContainer.innerHTML = '';
+            this.largeModeAbaci.innerHTML = '';
 
-    calculateActivePosition(element) {
-        const activeCount = this.bottomElements.filter(el => el.isActive).length;
-        return (activeCount * 10);
-    }
-
-    adjustBottomPositions() {
-        let activeIndex = 0;
-        this.bottomElements.forEach(el => {
-            if(el.isActive) {
-                el.element.style.top = `${50 + (activeIndex * 10)}%`;
-                activeIndex++;
-            } else {
-                el.element.style.top = `${el.startPos}%`;
+            for (let i = 0; i < config.count; i++) {
+                this.createAbacus(this.mainContainer);
             }
-        });
-    }
-}
 
-new AbacusController();
+            if (config.isLargeMode) {
+                this.showLargeMode();
+                for (let i = 0; i < config.count; i++) {
+                    this.createAbacus(this.largeModeAbaci);
+                }
+            } else {
+                this.showNormalMode();
+            }
+        }
+
+        createAbacus(container) {
+            const abacus = new Abacus(container, this);
+            this.controllers.push(abacus);
+            return abacus;
+        }
+
+        showLargeMode() {
+            document.getElementById('mainContainer').style.display = 'none';
+            this.largeModeContainer.style.display = 'flex';
+            this.numbersDisplayed = false;
+        }
+
+        showNormalMode() {
+            document.getElementById('mainContainer').style.display = 'flex';
+            this.largeModeContainer.style.display = 'none';
+            this.numbersDisplayed = false;
+        }
+
+        toggleNumbers() {
+            this.numbersDisplayed = !this.numbersDisplayed;
+            this.controllers.forEach(abacus => {
+                if (abacus.numberDisplay) {
+                    abacus.numberDisplay.style.display = this.numbersDisplayed ? 'block' : 'none';
+                }
+            });
+        }
+
+        updateNumberDisplay(abacus) {
+            if (abacus.numberDisplay) {
+                abacus.numberDisplay.textContent = abacus.currentValue;
+            }
+        }
+
+        shiftAbaci() {
+            const containerWidth = this.mainContainer.offsetWidth;
+            const abacusWidth = this.controllers[0].container.offsetWidth;
+            const abacusCount = this.controllers.length;
+            const totalAbacusWidth = abacusWidth * abacusCount;
+            const maxShift = Math.max(0, totalAbacusWidth - containerWidth + 30);
+            this.currentShift = (this.currentShift + 50) % (maxShift + 50);
+            this.mainContainer.style.transform = `translateX(-${this.currentShift}px)`;
+        }
+    }
+
+    class Abacus {
+        constructor(parent, controller) {
+            this.parent = parent;
+            this.controller = controller;
+            this.container = document.createElement('div');
+            this.container.className = 'container';
+            this.container.style.width = config.abacusWidth;
+            this.container.style.height = config.abacusHeight;
+            this.container.style.setProperty('--top-pos', config.abacusTop);
+            this.container.style.setProperty('--bottom-pos', config.abacusBottom);
+            this.container.style.setProperty('--divider-left', config.dividerLeft);
+            this.container.style.setProperty('--divider-right', config.dividerRight);
+            this.container.style.setProperty('--divider-top', config.dividerTop);
+            this.container.style.transition = 'all 0.3s';
+            this.shiftAmount = 50;
+
+            this.elements = [];
+            this.bottomElements = [];
+            this.currentValue = 0;
+            this.numberDisplay = null;
+            this.init();
+        }
+
+        init() {
+            this.parent.appendChild(this.container);
+            this.createNumberDisplay();
+
+            const centerLine = document.createElement('div');
+            centerLine.className = 'center-line';
+            this.container.appendChild(centerLine);
+
+            const divider = document.createElement('div');
+            divider.className = 'divider';
+            this.container.appendChild(divider);
+
+            this.createHexagon({
+                id: 'top',
+                startPos: parseInt(config.abacusTop.replace('%', '')),
+                activePos: parseInt(config.abacusTop.replace('%', '')) + 25,
+                type: 'top',
+                value: 5
+            });
+
+            for (let i = 0; i < config.difficulty; i++) {
+                const pos = 90 - i * (80 / config.difficulty);
+                this.createHexagon({
+                    id: `bot${i}`,
+                    startPos: pos,
+                    activePos: 0,
+                    type: 'bottom',
+                    order: i,
+                    value: 1
+                });
+            }
+
+            this.setupEventListeners();
+        }
+
+        createNumberDisplay() {
+            this.numberDisplay = document.createElement('div');
+            this.numberDisplay.className = 'number-display';
+            this.numberDisplay.textContent = this.currentValue;
+            this.container.appendChild(this.numberDisplay);
+        }
+
+        createHexagon(params) {
+            const hex = document.createElement('div');
+            hex.className = `hexagon ${params.type}`;
+
+            Object.assign(hex.style, {
+                top: `${params.startPos}%`,
+                width: '40px',
+                height: '25px',
+                backgroundColor: '#fff',
+                clipPath: 'polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%)',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+            });
+
+            const elementData = {
+                element: hex,
+                isActive: false,
+                startPos: params.startPos,
+                activePos: params.activePos,
+                type: params.type,
+                order: params.order || 0,
+                value: params.value
+            };
+
+            this.elements.push(elementData);
+            this.container.appendChild(hex);
+            return elementData;
+        }
+
+        setupEventListeners() {
+            this.elements.forEach(el => {
+                el.element.addEventListener('click', () => {
+                    this.handleElementClick(el);
+                });
+            });
+        }
+
+        handleElementClick(element) {
+            const addValue = element.isActive ? -element.value : element.value;
+            this.currentValue = Math.max(0, Math.min(9, this.currentValue + addValue));
+
+            element.isActive = !element.isActive;
+            element.element.style.backgroundColor = element.isActive ? '#2c3e50' : '#fff';
+
+            this.controller.updateNumberDisplay(this);
+        }
+    }
+
+    class SettingsPanel {
+        constructor(abacusController) {
+            this.abacusController = abacusController;
+            this.settingsContainer = document.getElementById('settingsContainer');
+            this.settingsPanel = document.getElementById('settingsPanel');
+            this.applySettingsBtn = document.getElementById('applySettingsBtn');
+            this.normalModeBtn = document.getElementById('normalModeBtn');
+            this.largeModeBtn = document.getElementById('largeModeBtn');
+            this.rotationInput = document.getElementById('rotation');
+            this.intervalInput = document.getElementById('interval');
+            this.impulsesInput = document.getElementById('impulses');
+            this.abacusCountButtons = document.getElementById('abacusCountButtons');
+            this.difficultyButtons = document.getElementById('difficultyButtons');
+            this.rotateLeft = document.getElementById('rotateLeft');
+            this.rotateRight = document.getElementById('rotateRight');
+            this.intervalLeft = document.getElementById('intervalLeft');
+            this.intervalRight = document.getElementById('intervalRight');
+            this.impulsesLeft = document.getElementById('impulsesLeft');
+            this.impulsesRight = document.getElementById('impulsesRight');
+
+            this.init();
+        }
+
+        init() {
+            this.setupEventListeners();
+            this.createAbacusCountButtons();
+            this.createDifficultyButtons();
+            this.loadSettings();
+        }
+
+        setupEventListeners() {
+            this.applySettingsBtn.addEventListener('click', () => this.applySettings());
+            this.normalModeBtn.addEventListener('click', () => this.setMode(false));
+            this.largeModeBtn.addEventListener('click', () => this.setMode(true));
+
+            // Обработчики для стрелок
+            this.rotateLeft.addEventListener('click', () => this.changeValue('rotation', -1));
+            this.rotateRight.addEventListener('click', () => this.changeValue('rotation', 1));
+            this.intervalLeft.addEventListener('click', () => this.changeValue('interval', -0.1));
+            this.intervalRight.addEventListener('click', () => this.changeValue('interval', 0.1));
+            this.impulsesLeft.addEventListener('click', () => this.changeValue('impulses', -1));
+            this.impulsesRight.addEventListener('click', () => this.changeValue('impulses', 1));
+        }
+
+        loadSettings() {
+            this.rotationInput.value = config.rotation;
+            this.intervalInput.value = config.interval;
+            this.impulsesInput.value = config.impulses;
+
+            // Set active state for mode buttons
+            this.normalModeBtn.classList.toggle('active', !config.isLargeMode);
+            this.largeModeBtn.classList.toggle('active', config.isLargeMode);
+
+            // Set active state for abacus count buttons
+            Array.from(this.abacusCountButtons.children).forEach(button => {
+                button.classList.toggle('active', parseInt(button.textContent) === config.count);
+            });
+
+            // Set active state for difficulty buttons
+            Array.from(this.difficultyButtons.children).forEach(button => {
+                button.classList.toggle('active', parseInt(button.textContent) === config.difficulty);
+            });
+        }
+
+        applySettings() {
+            config.rotation = parseFloat(this.rotationInput.value);
+            config.interval = parseFloat(this.intervalInput.value);
+            config.impulses = parseInt(this.impulsesInput.value);
+
+            this.abacusController.applySettings();
+            this.closePanel();
+        }
+
+        setMode(isLargeMode) {
+            config.isLargeMode = isLargeMode;
+            this.loadSettings();
+        }
+
+        createAbacusCountButtons() {
+            const counts = [1, 2, 3, 4, 5, 6, 7, 8];
+            counts.forEach(count => {
+                const button = document.createElement('button');
+                button.textContent = count;
+                button.className = 'toggle-button';
+                button.addEventListener('click', () => {
+                    config.count = count;
+                    this.loadSettings();
+                });
+                this.abacusCountButtons.appendChild(button);
+            });
+        }
+
+        createDifficultyButtons() {
+            const difficulties = [1, 2, 3, 4, 5, 6, 7, 8];
+            difficulties.forEach(difficulty => {
+                const button = document.createElement('button');
+                button.textContent = difficulty;
+                button.className = 'toggle-button';
+                button.addEventListener('click', () => {
+                    config.difficulty = difficulty;
+                    this.loadSettings();
+                });
+                this.difficultyButtons.appendChild(button);
+            });
+        }
+
+        changeValue(setting, change) {
+            let value = config[setting];
+            if (typeof value === 'number') {
+                value += change;
+            } else if (typeof value === 'string') {
+                value = parseFloat(value) + change;
+            }
+
+            config[setting] = Math.max(0, value);
+            this.loadSettings();
+        }
+
+        closePanel() {
+            document.getElementById('settingsContainer').style.display = 'none';
+        }
+    }
+
+    const abacusController = new AbacusController();
 </script>
 </body>
 </html>
