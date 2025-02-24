@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Столбец</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #333333;
+            color: #ffffff;
+            margin: 0;
+            overflow: auto;
+            /* Changed from hidden to auto, so scrollbars appear when content overflows */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Ensure the body takes at least the full screen height */
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            /* Limit container width */
+            max-width: 1200px;
+            /* Maximum width of the container */
+            margin: 20px;
+            /* Add margin around the container */
+        }
+
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .settings-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            background-color: #222222;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .setting-label {
+            margin-right: 10px;
+            font-size: 20px;
+            /* Adjusted font size */
+        }
+
+        .button-group {
+            display: flex;
+        }
+
+        .button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #555555;
+            color: #ffffff;
+            font-size: 18px;
+            /* Adjusted font size */
+            cursor: pointer;
+        }
+
+        .button.selected {
+            background-color: #00aa00;
+        }
+
+        .button:hover {
+            background-color: #777777;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            /* Align items to the start */
+            flex-wrap: wrap;
+            /* Allow columns to wrap on smaller screens */
+            width: 100%;
+            /* Take up full width of the container */
+        }
+
+        .column-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+            /* Reduced margin */
+            width: calc(100% / 5);
+            /* Distribute columns evenly, max 5 */
+            max-width: 200px;
+            /* Limit column container width */
+        }
+
+        .column-text {
+            font-size: 24px;
+            /* Reduced font size */
+            text-align: center;
+            margin-bottom: 5px;
+            /* Reduced margin */
+            white-space: pre-line;
+            /* Preserve line breaks */
+            line-height: 1.2;
+            /* Adjust line height for better readability */
+        }
+
+        input[type="text"] {
+            width: 120px;
+            /* Adjusted input width */
+            padding: 3px;
+            /* Adjusted padding */
+            margin-bottom: 5px;
+            /* Reduced margin */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            /* Adjusted border-radius */
+            background-color: #222222;
+            color: #ffffff;
+            font-size: 20px;
+            /* Adjusted font size */
+            text-align: center;
+            outline: none;
+        }
+
+        .check-button {
+            padding: 5px 15px;
+            /* Adjusted padding */
+            border: none;
+            border-radius: 5px;
+            background-color: #00aa00;
+            color: #ffffff;
+            font-size: 20px;
+            /* Adjusted font size */
+            cursor: pointer;
+        }
+
+        .check-button:hover {
+            background-color: #00cc00;
+        }
+
+        .result-text {
+            font-size: 18px;
+            /* Adjusted font size */
+            margin-top: 5px;
+            /* Reduced margin */
+            padding: 3px 5px;
+            /* Adjusted padding */
+            border-radius: 5px;
+        }
+
+        .back-button,
+        .continue-button {
+            padding: 8px 16px;
+            /* Adjusted padding */
+            margin: 8px;
+            /* Adjusted margin */
+            border: none;
+            border-radius: 5px;
+            background-color: #555555;
+            color: #ffffff;
+            font-size: 20px;
+            /* Adjusted font size */
+            cursor: pointer;
+        }
+
+        .back-button:hover,
+        .continue-button:hover {
+            background-color: #777777;
+        }
+
+        .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #444444;
+        }
+
+        .column-score {
+            font-size: 24px;
+            /* Adjusted font size */
+            margin-bottom: 3px;
+            /* Reduced margin */
+        }
+
+        .name-input {
+            width: 120px;
+            /* Adjusted input width */
+            padding: 3px;
+            /* Adjusted padding */
+            margin-bottom: 3px;
+            /* Reduced margin */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            /* Adjusted border-radius */
+            background-color: #222222;
+            color: #ffffff;
+            font-size: 18px;
+            /* Adjusted font size */
+            text-align: center;
+            outline: none;
+        }
+
+        .column-border {
+            position: relative;
+            /* Ensure it's relative for absolute positioning of content */
+            width: 180px;
+            /* Adjusted width */
+            padding: 10px;
+            /* Adjusted padding */
+            background-color: #222222;
+            border: 1px solid #ffffff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .absolute {
+            position: absolute;
+        }
+
+        .relative {
+            position: relative;
+        }
+
+        /* Media query for smaller screens */
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+                /* Stack columns vertically */
+                align-items: center;
+            }
+
+            .column-container {
+                width: 80%;
+                /* Make columns wider on smaller screens */
+                max-width: none;
+                /* Remove max width */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-container" class="container">
+        <div id="menu-scene" class="menu-container">
+            <h1>Настройки игры</h1>
+            <div class="settings-container">
+                <div class="setting-row">
+                    <label class="setting-label">Столбцы:</label>
+                    <div id="column-buttons" class="button-group">
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label class="setting-label">Операции:</label>
+                    <div id="operation-buttons" class="button-group">
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label class="setting-label">Сложность:</label>
+                    <div id="difficulty-buttons" class="button-group">
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label class="setting-label">Слагаемые:</label>
+                    <div id="addend-buttons" class="button-group">
+                    </div>
+                </div>
+                <button id="start-button" class="button">Старт</button>
+            </div>
+        </div>
+
+        <div id="game-scene" class="game-container relative" style="display: none;">
+        </div>
+
+        <button id="back-to-menu" class="back-button" style="display: none;">Настройки</button>
+        <button id="continue-game" class="continue-button disabled" style="display: none;">Продолжить</button>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const menuScene = document.getElementById('menu-scene');
+        const gameScene = document.getElementById('game-scene');
+        const backToMenuButton = document.getElementById('back-to-menu');
+        const continueGameButton = document.getElementById('continue-game');
+
+        // Styles (moved to CSS)
+        const STYLES = {
+            textWhite: "#ffffff",
+            textGreen: "#00ff00",
+            backgroundSecDark: "#444444",
+            backgroundSec: "#555555",
+            backgroundMain: "#333333",
+            backgroundMainDark: "#222222",
+            backgroundGreen: "#00aa00",
+            fontSizeLarger: "36px",
+            fontSizeLarge: "28px",
+            fontSizeMedium: "24px",
+            fontSizeSmall: "18px",
+        };
+
+        // Game settings
+        let columnCount = 1;
+        let operation = "+";
+        let difficulty = 1;
+        let addends = 3;
+        let score = Array(5).fill(null).map(() => ({
+            wins: 0,
+            total: 0
+        })); // Initialize score for up to 5 columns
+        let playerNames = Array(5).fill("");
+
+        // Menu Scene
+        const columnButtons = [1, 2, 3, 4, 5];
+        const operationButtons = ["+", "-", "+/-"];
+        const difficultyButtons = [1, 2, 3, 4, 5, 6];
+        const addendButtons = [3, 4, 5, 6, 7, 8, 9, 10];
+
+        function createButtons(buttonData, containerId, settingType) {
+            const container = document.getElementById(containerId);
+            buttonData.forEach((data, index) => {
+                const button = document.createElement('button');
+                button.textContent = data;
+                button.classList.add('button');
+                if (index === 0) {
+                    button.classList.add('selected');
+                }
+
+                button.addEventListener('click', () => {
+                    // Remove selected class from all buttons in the group
+                    Array.from(container.children).forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+
+                    // Update the corresponding setting variable
+                    switch (settingType) {
+                        case 'columnCount':
+                            columnCount = data;
+                            break;
+                        case 'operation':
+                            operation = data;
+                            break;
+                        case 'difficulty':
+                            difficulty = data;
+                            break;
+                        case 'addends':
+                            addends = data;
+                            break;
+                    }
+                });
+                container.appendChild(button);
+            });
+        }
+
+        createButtons(columnButtons, 'column-buttons', 'columnCount');
+        createButtons(operationButtons, 'operation-buttons', 'operation');
+        createButtons(difficultyButtons, 'difficulty-buttons', 'difficulty');
+        createButtons(addendButtons, 'addend-buttons', 'addends');
+
+        document.getElementById('start-button').addEventListener('click', () => {
+            menuScene.style.display = 'none';
+            gameScene.style.display = 'flex';
+            backToMenuButton.style.display = 'inline-block';
+            continueGameButton.style.display = 'inline-block';
+
+            startGame();
+        });
+
+        // Game Scene
+        let columnsData = []; // Store data for each column, including elements
+        let correctAnswers = [];
+        let nameInputs = [];
+
+        function startGame() {
+            // Clear previous game elements
+            gameScene.innerHTML = '';
+            columnsData = []; // Reset the array
+            correctAnswers = [];
+            nameInputs = [];
+
+            // Create columns
+            const centerX = gameContainer.offsetWidth / 2;
+            const centerY = gameContainer.offsetHeight / 2;
+
+            const difficulties = [9, 99, 999, 9999, 99999, 999999];
+            const numberRange = Math.pow(10, difficulties[difficulty - 1].toString().length) - 1;
+
+            for (let i = 0; i < columnCount; i++) {
+                const columnData = createColumn(i, numberRange, centerX, centerY);
+                columnsData.push(columnData); // Store column data
+
+                const columnContainer = document.createElement('div');
+                columnContainer.classList.add('column-container'); // Use new column container class
+                gameScene.appendChild(columnContainer);
+
+                // Column Border
+                const columnBorder = document.createElement('div');
+                columnBorder.classList.add('column-border');
+                columnContainer.appendChild(columnBorder);
+
+                // Name Input
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.classList.add('name-input');
+                nameInput.placeholder = 'Имя';
+                nameInput.value = playerNames[i] || ""; // Use stored player name if available
+                columnBorder.appendChild(nameInput);
+                nameInputs.push(nameInput);
+
+                // Column Score Display
+                const columnScore = document.createElement('div');
+                columnScore.classList.add('column-score');
+                columnScore.textContent = `${score[i].wins} из ${score[i].total}`;
+                columnBorder.appendChild(columnScore);
+                columnData.columnScore = columnScore; // Store reference for updates
+
+                // Column Text
+                const columnText = document.createElement('div');
+                columnText.classList.add('column-text');
+                columnText.textContent = columnData.column.join('\n');
+                columnBorder.appendChild(columnText);
+                columnData.columnTextElement = columnText; // Store reference to column text element
+
+                // Answer Input
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'Ответ';
+                input.classList.add('name-input');
+                columnBorder.appendChild(input);
+                columnData.input = input; // Store reference for answer
+
+                // Check Button
+                const checkButton = document.createElement('button');
+                checkButton.textContent = 'Ответить';
+                checkButton.classList.add('check-button');
+                checkButton.addEventListener('click', () => checkAnswer(i));
+                columnBorder.appendChild(checkButton);
+                columnData.checkButton = checkButton; // Store reference
+
+                // Result Text
+                const resultText = document.createElement('div');
+                resultText.classList.add('result-text');
+                columnBorder.appendChild(resultText);
+                columnData.resultText = resultText; // Store reference
+            }
+        }
+
+        function createColumn(index, numberRange, centerX, centerY) {
+            const column = [];
+            let sum = 0;
+
+            for (let i = 0; i < addends; i++) {
+                const number = getRandomNumber(numberRange);
+                column.push(number);
+                sum += number;
+            }
+
+            correctAnswers[index] = sum; // Store the correct answer
+
+            return {
+                column: column,
+                sum: sum,
+                columnIndex: index
+            };
+        }
+
+        function checkAnswer(columnIndex) {
+            const columnData = columnsData[columnIndex];
+            const userAnswer = parseInt(columnData.input.value);
+            const correctAnswer = correctAnswers[columnIndex];
+
+            const isCorrect = userAnswer === correctAnswer;
+
+            const resultTextString = isCorrect
+                ? `${userAnswer} = ${correctAnswer}!`
+                : `${isNaN(userAnswer) ? 0 : userAnswer} ≠ ${correctAnswer}!`;
+
+            columnData.input.style.display = 'none';
+            columnData.checkButton.style.display = 'none';
+            columnData.resultText.textContent = resultTextString;
+            columnData.resultText.style.backgroundColor = isCorrect ? STYLES.backgroundGreen : STYLES.backgroundSec;
+
+            if (isCorrect) {
+                score[columnIndex].wins++;
+            }
+            score[columnIndex].total++;
+            columnData.columnScore.textContent = `${score[columnIndex].wins} из ${score[columnIndex].total}`;
+
+            if (columnsData.every(data => data.checkButton.style.display === 'none')) {
+                backToMenuButton.style.display = 'inline-block';
+                continueGameButton.classList.remove('disabled');
+                continueGameButton.style.backgroundColor = STYLES.backgroundSec;
+                continueGameButton.style.cursor = 'pointer';
+                continueGameButton.addEventListener('click', continueGame);
+            }
+        }
+
+        function continueGame() {
+            // Store the player names before restarting
+            playerNames = nameInputs.map(input => input.value);
+
+            // Reset display properties for the next round
+            columnsData.forEach(data => {
+                data.input.style.display = 'block';
+                data.checkButton.style.display = 'inline-block';
+                data.resultText.textContent = ''; // Clear result text
+                data.resultText.style.backgroundColor = 'transparent'; // Reset background color
+            });
+
+            backToMenuButton.style.display = 'none';
+            continueGameButton.classList.add('disabled');
+            continueGameButton.style.backgroundColor = STYLES.backgroundSecDark;
+            continueGameButton.style.cursor = 'not-allowed';
+            continueGameButton.removeEventListener('click', continueGame);
+
+            // Restart the game with the same settings
+            startGame();
+        }
+
+
+        function getRandomNumber(numberRange) {
+            let number = Math.floor(Math.random() * numberRange) + 1;
+            if (operation === "-") {
+                return -number;
+            } else if (operation === "+/-") {
+                return Math.random() < 0.5 ? number : -number;
+            } else {
+                return number;
+            }
+        }
+
+        backToMenuButton.addEventListener('click', () => {
+            // Store the player names before going back to menu
+            playerNames = nameInputs.map(input => input.value);
+
+            // Reset game scene display
+            gameScene.style.display = 'none';
+            backToMenuButton.style.display = 'none';
+            continueGameButton.style.display = 'none';
+
+            // Show menu scene
+            menuScene.style.display = 'flex';
+
+            // Clear the game scene
+            gameScene.innerHTML = '';
+
+            //Re-enable continue button in case it was disabled
+            continueGameButton.classList.remove('disabled');
+            continueGameButton.style.backgroundColor = STYLES.backgroundSec;
+            continueGameButton.style.cursor = 'pointer';
+            continueGameButton.removeEventListener('click', continueGame);
+        });
+    </script>
+</body>
+
+</html>
